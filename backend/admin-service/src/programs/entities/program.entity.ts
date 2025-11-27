@@ -1,39 +1,43 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('bi_programs')
+@Entity('programs')
 export class Program {
-  @PrimaryGeneratedColumn({ name: 'program_id' })
-  program_id: number;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
 
-  @Column({ name: 'program_name', type: 'text', nullable: true })
-  program_name: string;
+  @Column({ type: 'varchar', length: 50, unique: true })
+  code: string; // e.g. SCHOOL_STUDENT, COLLEGE_STUDENT, EMPLOYEE
 
-  @Column({ name: 'program_level', type: 'smallint', default: 0 })
-  program_level: number;
+  @Column({ type: 'varchar', length: 255 })
+  name: string; // Display name
 
-  @Column({ name: 'assessment_title', type: 'varchar', length: 100, nullable: true })
-  assessment_title: string;
+  @Column({ type: 'text', nullable: true })
+  description?: string; // Long description for UI / admin
 
-  @Column({ name: 'report_title', type: 'text', nullable: true })
-  report_title: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  assessment_title?: string; // Heading on assessment page
 
-  @Column({ name: 'createdby', type: 'int', nullable: true })
-  createdby: number;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  report_title?: string; // Heading on generated report/PDF
 
-  @Column({ name: 'createdon', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdon: Date;
+  @Column({ type: 'boolean', default: false })
+  is_demo: boolean; // Default FALSE
+
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean; // Default TRUE
 
   @Column({
-    name: 'updatedon',
-    type: 'timestamp',
+    type: 'timestamptz',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  created_at: Date;
+
+  @Column({
+    type: 'timestamptz',
+    name: 'updated_at',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updatedon: Date;
-
-  @Column({ name: 'status', type: 'smallint', default: 0 })
-  status: number;
-
-  @Column({ name: 'deleted', type: 'smallint', default: 0 })
-  deleted: number;
+  updated_at: Date;
 }

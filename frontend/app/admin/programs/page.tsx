@@ -3,8 +3,26 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+type ProgramRow = {
+  id?: number;
+  program_id?: number;
+
+  // new fields
+  code?: string;
+  name?: string;
+  description?: string;
+  assessment_title?: string;
+  report_title?: string;
+  is_demo?: boolean | number | string;
+  is_active?: boolean | number | string;
+
+  // legacy fields (fallbacks)
+  program_name?: string;
+  status?: number | string;
+};
+
 export default function ProgramsPage() {
-  const [programs, setPrograms] = useState<any[]>([]);
+  const [programs, setPrograms] = useState<ProgramRow[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:4001/programs")
@@ -20,9 +38,59 @@ export default function ProgramsPage() {
       method: "DELETE",
     });
 
-    // Remove from UI without reload
-    setPrograms((prev) => prev.filter((p) => p.program_id !== id));
+    setPrograms((prev) => prev.filter((p) => (p.id ?? p.program_id) !== id));
   };
+
+  // ---------- Helpers to normalize data ----------
+
+  const getId = (p: ProgramRow) => p.id ?? p.program_id;
+
+  const getName = (p: ProgramRow) => p.name ?? p.program_name ?? "--";
+
+  const getCode = (p: ProgramRow) => {
+    if (p.code && p.code.trim() !== "") {
+        return p.code;
+    } else{
+        return "--";
+    }
+  };
+
+  const getDescription = (p: ProgramRow) => {
+    if (p.description && p.description.trim() !== "") return p.description;
+    // fall back to other meaningful text so it doesn't look empty
+    if (p.assessment_title && p.assessment_title.trim() !== "")
+      return p.assessment_title;
+    if (p.report_title && p.report_title.trim() !== "")
+      return p.report_title;
+
+    return "--";
+  };
+
+  const getIsActive = (p: ProgramRow) => {
+    if (p.is_active !== undefined && p.is_active !== null) {
+      if (typeof p.is_active === "boolean") return p.is_active;
+      if (typeof p.is_active === "number") return p.is_active === 1;
+      if (typeof p.is_active === "string")
+        return p.is_active === "1" || p.is_active === "true";
+    }
+    // fallback to old status field (0/1)
+    if (p.status !== undefined && p.status !== null) {
+      if (typeof p.status === "number") return p.status === 1;
+      if (typeof p.status === "string") return p.status === "1";
+    }
+    return false;
+  };
+
+  const getIsDemo = (p: ProgramRow) => {
+    if (p.is_demo === undefined || p.is_demo === null) return false;
+    if (typeof p.is_demo === "boolean") return p.is_demo;
+    if (typeof p.is_demo === "number") return p.is_demo === 1;
+    if (typeof p.is_demo === "string")
+      return p.is_demo === "1" || p.is_demo === "true";
+    return false;
+  };
+
+  // ---------- UI ----------
 
   return (
     <div className="p-10 bg-gray-50 min-h-screen">
@@ -39,89 +107,103 @@ export default function ProgramsPage() {
       </div>
 
       {/* Table Container */}
-      <div className="bg-white rounded-xl shadow border p-5">
-        <table className="w-full border-collapse">
+      <div className="bg-white rounded-xl shadow border p-5 overflow-x-auto">
+        <table className="w-full border-collapse min-w-[1000px]">
           <thead>
             <tr className="bg-green-600 text-white text-left">
               <th className="p-3">Action</th>
               <th className="p-3">Status</th>
-              <th className="p-3">Program Name</th>
-              <th className="p-3">Program Level</th>
+              <th className="p-3">Code</th>
+              <th className="p-3">Name</th>
+              <th className="p-3">Description</th>
+              <th className="p-3">Demo?</th>
               <th className="p-3">Assessment Title</th>
               <th className="p-3">Report Title</th>
             </tr>
           </thead>
 
           <tbody>
-            {programs.map((p: any, index: number) => (
-              <tr
-                key={p.program_id}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}
-              >
-                {/* ACTION BUTTONS */}
-                <td className="p-3 flex gap-4 text-xl text-black">
-                  <Link
-                    href={`/admin/programs/${p.program_id}`}
-                    className="text-green-700 hover:text-green-900"
-                    title="View"
-                  >
-                    👁
-                  </Link>
+            {programs.map((p, index) => {
+              const id = getId(p);
+              const isActive = getIsActive(p);
+              const isDemo = getIsDemo(p);
 
-                  <Link
-                    href={`/admin/programs/${p.program_id}/edit`}
-                    className="text-yellow-600 hover:text-yellow-800"
-                    title="Edit"
-                  >
-                    ✏️
-                  </Link>
+              return (
+                <tr
+                  key={id}
+                  className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}
+                >
+                  {/* ACTION BUTTONS */}
+                  <td className="p-3 flex gap-4 text-xl text-black">
+                    <Link
+                      href={`/admin/programs/${id}`}
+                      className="text-green-700 hover:text-green-900"
+                      title="View"
+                    >
+                      👁
+                    </Link>
 
-                  <button
-                    onClick={() => deleteProgram(p.program_id)}
-                    className="text-red-600 hover:text-red-800"
-                    title="Delete"
-                  >
-                    🗑
-                  </button>
-                </td>
+                    <Link
+                      href={`/admin/programs/${id}/edit`}
+                      className="text-yellow-600 hover:text-yellow-800"
+                      title="Edit"
+                    >
+                      ✏️
+                    </Link>
 
-                {/* STATUS SWITCH */}
-                <td className="p-3 text-black">
-                  <label className="inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      defaultChecked={p.status === 1}
-                      className="hidden peer"
-                      readOnly
-                    />
-                    <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-600 relative transition">
-                      <div
-                        className="absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 
-                        peer-checked:translate-x-5 transition"
-                      ></div>
-                    </div>
-                  </label>
-                </td>
+                    <button
+                      onClick={() => deleteProgram(Number(id))}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      🗑
+                    </button>
+                  </td>
 
-                <td className="p-3 text-black">{p.program_name}</td>
+                  {/* STATUS SWITCH (is_active) */}
+                  <td className="p-3 text-black">
+                    <label className="inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isActive}
+                        className="hidden peer"
+                        readOnly
+                      />
+                      <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-600 relative transition">
+                        <div
+                          className="absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 
+                          peer-checked:translate-x-5 transition"
+                        ></div>
+                      </div>
+                    </label>
+                  </td>
 
-                <td className="p-3 text-black">
-                  {p.program_level === 0
-                    ? "General"
-                    : p.program_level === 1
-                    ? "Advanced"
-                    : "N/A"}
-                </td>
+                  {/* CODE */}
+                  <td className="p-3 text-black">{getCode(p)}</td>
 
-                <td className="p-3 text-black">
-                  {p.assessment_title || "--"}
-                </td>
+                  {/* NAME */}
+                  <td className="p-3 text-black">{getName(p)}</td>
 
-                <td className="p-3 text-black">
-                  {p.report_title || "--"}
-                </td>
-              </tr>
-            ))}
+                  {/* DESCRIPTION */}
+                  <td className="p-3 text-black">{getDescription(p)}</td>
+
+                  {/* DEMO FLAG */}
+                  <td className="p-3 text-black">
+                    {isDemo ? "Yes" : "No"}
+                  </td>
+
+                  {/* ASSESSMENT TITLE */}
+                  <td className="p-3 text-black">
+                    {p.assessment_title || "--"}
+                  </td>
+
+                  {/* REPORT TITLE */}
+                  <td className="p-3 text-black">
+                    {p.report_title || "--"}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 

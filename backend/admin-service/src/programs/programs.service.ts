@@ -12,63 +12,79 @@ export class ProgramsService {
     private readonly repo: Repository<Program>,
   ) {}
 
-  async create(data: CreateProgramDto) {
-    const level =
-      typeof data.program_level === 'string'
-        ? Number(data.program_level)
-        : data.program_level ?? 0;
+  async create(data: CreateProgramDto): Promise<Program> {
+    // Normalize booleans in case frontend sends them as strings
+    const is_demo =
+      typeof data.is_demo === 'string'
+        ? data.is_demo === 'true'
+        : data.is_demo ?? false;
 
-    const status =
-      typeof data.status === 'string'
-        ? Number(data.status)
-        : data.status ?? 1;
+    const is_active =
+      typeof data.is_active === 'string'
+        ? data.is_active === 'true'
+        : data.is_active ?? true;
 
-    const program = this.repo.create({
-      program_name: data.program_name,
-      program_level: level,
-      assessment_title: data.assessment_title ?? '',  // avoid null for TS
-      report_title: data.report_title ?? '',          // avoid null for TS
-      status,
-      deleted: 0,
-      createdby: 0
-      // createdby not set → stays undefined → DB default (nullable) is used
-    });
+    // Explicit instance to avoid TypeORM overload / TS confusion
+    const program = new Program();
+    program.code = data.code;
+    program.name = data.name;
+
+    // Optional fields – assign only if defined (no null type issues)
+    if (data.description !== undefined) {
+      program.description = data.description;
+    }
+    if (data.assessment_title !== undefined) {
+      program.assessment_title = data.assessment_title;
+    }
+    if (data.report_title !== undefined) {
+      program.report_title = data.report_title;
+    }
+
+    program.is_demo = is_demo;
+    program.is_active = is_active;
+    // created_at / updated_at handled by DB defaults
 
     return this.repo.save(program);
   }
 
-  async update(id: number, data: UpdateProgramDto) {
-    const program_level =
-      typeof data.program_level === "string"
-        ? Number(data.program_level)
-        : data.program_level ?? 0;
+  async update(id: number, data: UpdateProgramDto): Promise<Program | null> {
+    const is_demo =
+      typeof data.is_demo === 'string'
+        ? data.is_demo === 'true'
+        : data.is_demo;
 
-    const status =
-      typeof data.status === "string"
-        ? Number(data.status)
-        : data.status ?? 1;
+    const is_active =
+      typeof data.is_active === 'string'
+        ? data.is_active === 'true'
+        : data.is_active;
 
-    const updateData = {
-      program_name: data.program_name,
-      program_level,
-      assessment_title: data.assessment_title ?? "",
-      report_title: data.report_title ?? "",
-      status
-    };
+    const updateData: Partial<Program> = {};
 
-    return this.repo.update({ program_id: id }, updateData);
+    if (data.code !== undefined) updateData.code = data.code;
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.assessment_title !== undefined) {
+      updateData.assessment_title = data.assessment_title;
+    }
+    if (data.report_title !== undefined) {
+      updateData.report_title = data.report_title;
+    }
+    if (is_demo !== undefined) updateData.is_demo = is_demo;
+    if (is_active !== undefined) updateData.is_active = is_active;
+
+    await this.repo.update({ id }, updateData);
+    return this.findOne(id);
   }
 
-
-  findAll() {
+  findAll(): Promise<Program[]> {
     return this.repo.find();
   }
 
-  findOne(id: number) {
-    return this.repo.findOne({ where: { program_id: id } });
+  findOne(id: number): Promise<Program | null> {
+    return this.repo.findOne({ where: { id } });
   }
 
   remove(id: number) {
-    return this.repo.delete({ program_id: id });
+    return this.repo.delete({ id });
   }
 }

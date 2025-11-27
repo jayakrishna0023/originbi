@@ -1,8 +1,29 @@
-// create-program.dto.ts
+import { IsString, IsBoolean, IsOptional } from 'class-validator';
+
 export class CreateProgramDto {
-  program_name: string;
-  program_level: number;        // 0 or 1
+  @IsString()
+  code: string;
+
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
   assessment_title?: string;
+
+  @IsOptional()
+  @IsString()
   report_title?: string;
-  status?: number;              // 0 or 1
+
+  @IsOptional()
+  @IsBoolean()
+  is_demo?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean;
 }

@@ -10,11 +10,13 @@ export default function EditProgram({ params }: any) {
   const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
-    program_name: "",
-    program_level: 0,      // 0 = General, 1 = Advanced
-    status: 1,             // 1 = Active, 0 = Inactive
+    code: "",
+    name: "",
+    description: "",
     assessment_title: "",
     report_title: "",
+    is_demo: false,
+    is_active: true,
   });
 
   useEffect(() => {
@@ -22,42 +24,61 @@ export default function EditProgram({ params }: any) {
       .then((res) => res.json())
       .then((data) => {
         setForm({
-          program_name: data.program_name ?? "",
-          program_level:
-            typeof data.program_level === "number" ? data.program_level : 0,
-          status: typeof data.status === "number" ? data.status : 1,
+          code: data.code ?? "",
+          name: data.name ?? "",
+          description: data.description ?? "",
           assessment_title: data.assessment_title ?? "",
           report_title: data.report_title ?? "",
+          is_demo: !!data.is_demo,
+          is_active: data.is_active !== undefined ? !!data.is_active : true,
         });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load program:", err);
         setLoading(false);
       });
   }, [id]);
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
-    const { name, value } = e.target;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
 
     setForm((prev) => {
-      // convert numeric fields
-      if (name === "program_level" || name === "status") {
-        return { ...prev, [name]: Number(value) };
+      if (type === "checkbox") {
+        return { ...prev, [name]: checked };
       }
       return { ...prev, [name]: value };
     });
   };
 
   const update = async () => {
-    await fetch(`http://localhost:4001/programs/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form), // program_level & status are numbers
-    });
+    try {
+      const res = await fetch(`http://localhost:4001/programs/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    router.push("/admin/programs");
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Update error:", errText);
+        alert("Failed to update program. Please try again.");
+        return;
+      }
+
+      router.push("/admin/programs");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please check the console.");
+    }
   };
 
-  if (loading) return <p className="text-black">Loading...</p>;
+  if (loading) return <p className="text-black p-6">Loading...</p>;
 
   return (
     <div className="min-h-screen bg-[#f5f6fa] p-6 text-black">
@@ -75,6 +96,21 @@ export default function EditProgram({ params }: any) {
         {/* FORM CONTENT */}
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Program Code */}
+            <div>
+              <label className="block font-semibold mb-1">
+                Program Code *
+              </label>
+              <input
+                type="text"
+                name="code"
+                value={form.code}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-black"
+                placeholder="e.g. SCHOOL_STUDENT"
+              />
+            </div>
+
             {/* Program Name */}
             <div>
               <label className="block font-semibold mb-1">
@@ -82,42 +118,46 @@ export default function EditProgram({ params }: any) {
               </label>
               <input
                 type="text"
-                name="program_name"
-                value={form.program_name}
+                name="name"
+                value={form.name}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2 text-black"
                 placeholder="Enter Program Name"
               />
             </div>
 
-            {/* Program Level */}
-            <div>
-              <label className="block font-semibold mb-1">
-                Program Level *
-              </label>
-              <select
-                name="program_level"
-                value={form.program_level}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-black"
-              >
-                <option value={0}>General</option>
-                <option value={1}>Advanced</option>
-              </select>
-            </div>
-
-            {/* Status */}
+            {/* Status (is_active) */}
             <div>
               <label className="block font-semibold mb-1">Status *</label>
-              <select
-                name="status"
-                value={form.status}
+              <div className="flex items-center h-full">
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={form.is_active}
+                    onChange={handleChange}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm text-gray-800">
+                    Active (uncheck to make Inactive)
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="grid grid-cols-1 mt-6">
+            <div>
+              <label className="block font-semibold mb-1">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-black"
-              >
-                <option value={1}>Active</option>
-                <option value={0}>Inactive</option>
-              </select>
+                rows={3}
+                className="w-full border rounded px-3 py-2 text-black resize-y"
+                placeholder="Enter a short description for this program"
+              />
             </div>
           </div>
 
@@ -125,7 +165,7 @@ export default function EditProgram({ params }: any) {
             {/* Assessment Title */}
             <div>
               <label className="block font-semibold mb-1">
-                Assessment Title *
+                Assessment Title
               </label>
               <input
                 type="text"
@@ -139,9 +179,7 @@ export default function EditProgram({ params }: any) {
 
             {/* Report Title */}
             <div>
-              <label className="block font-semibold mb-1">
-                Report Title *
-              </label>
+              <label className="block font-semibold mb-1">Report Title</label>
               <input
                 type="text"
                 name="report_title"
@@ -150,6 +188,27 @@ export default function EditProgram({ params }: any) {
                 className="w-full border rounded px-3 py-2 text-black"
                 placeholder="Enter Report Title"
               />
+            </div>
+          </div>
+
+          {/* Is Demo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <label className="block font-semibold mb-1">Demo Program?</label>
+              <div className="flex items-center h-full">
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="is_demo"
+                    checked={form.is_demo}
+                    onChange={handleChange}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm text-gray-800">
+                    Mark as Demo (trial / sample)
+                  </span>
+                </label>
+              </div>
             </div>
           </div>
 
