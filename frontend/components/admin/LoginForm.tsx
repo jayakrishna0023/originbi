@@ -44,23 +44,31 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setValues({ ...values, [name]: value });
+    setValues((prev) => ({ ...prev, [name]: value }));
 
     if (touched[name as keyof typeof touched]) {
-      if (name === 'email') setErrors({ ...errors, email: validateEmail(value) });
-      if (name === 'password') setErrors({ ...errors, password: validatePassword(value) });
+      if (name === 'email') {
+        setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+      }
+      if (name === 'password') {
+        setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
+      }
     }
   };
 
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setTouched({ ...touched, [name]: true });
+    setTouched((prev) => ({ ...prev, [name]: true }));
 
-    if (name === 'email') setErrors({ ...errors, email: validateEmail(value) });
-    if (name === 'password') setErrors({ ...errors, password: validatePassword(value) });
+    if (name === 'email') {
+      setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+    }
+    if (name === 'password') {
+      setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
+    }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const emailError = validateEmail(values.email);
@@ -74,7 +82,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
     try {
       setIsSubmitting(true);
 
-      // 1️⃣ Sign in against Cognito
+      // 🧹 0️⃣ Ensure no old session is hanging around
+      try {
+        await signOut(); // or signOut({ global: true }) if you want to clear all devices
+      } catch {
+        // ignore signOut errors (e.g., no user signed in)
+      }
+
+      // 1️⃣ Sign in with Cognito
       const signInResult = await signIn({
         username: values.email,
         password: values.password,
@@ -82,7 +97,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       console.log('signInResult:', signInResult);
 
-      // If Cognito requires another step (e.g. new password), tokens will not exist yet
       if (!signInResult.isSignedIn) {
         setErrors({
           email: '',
@@ -92,17 +106,25 @@ const LoginForm: React.FC<LoginFormProps> = ({
         return;
       }
 
-      // 2️⃣ Read token & groups (from ID token OR Access token)
+      // 2️⃣ Get tokens & groups
       const session = await fetchAuthSession();
       console.log('full session:', session);
 
       const { tokens } = session;
 
       if (!tokens) {
-        // No active session → treat as login failure, not group failure
         setErrors({
           email: '',
           password: 'Login session could not be created. Please try again.',
+        });
+        return;
+      }
+
+      const idTokenJwt = tokens.idToken?.toString();
+      if (!idTokenJwt) {
+        setErrors({
+          email: '',
+          password: 'Could not read login token. Please try again.',
         });
         return;
       }
@@ -113,14 +135,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
       const idGroups =
         (tokens.idToken?.payload['cognito:groups'] as string[] | undefined) || [];
       const accessGroups =
-        (tokens.accessToken?.payload['cognito:groups'] as string[] | undefined) || [];
+        (tokens.accessToken?.payload['cognito:groups'] as string[] | undefined) ||
+        [];
 
       const groups = [...new Set([...idGroups, ...accessGroups])];
 
       console.log('Groups merged from tokens:', groups);
       console.log('Portal mode:', portalMode);
 
-      // 3️⃣ Decide which group is required for this portal
+      // 3️⃣ Required group based on portal
       let requiredGroup = '';
       if (portalMode === 'admin') requiredGroup = 'ADMIN';
       if (portalMode === 'student') requiredGroup = 'STUDENT';
@@ -128,7 +151,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       console.log('Required group for this portal:', requiredGroup);
 
-      // 4️⃣ Enforce group restriction (only if we actually have groups)
+      // 4️⃣ Client-side group restriction
       if (requiredGroup && !groups.includes(requiredGroup)) {
         await signOut();
         setErrors({
@@ -139,10 +162,54 @@ const LoginForm: React.FC<LoginFormProps> = ({
         return;
       }
 
-      // ✅ Correct group → let the page redirect
+      // 5️⃣ Call backend to verify token + role
+      const apiBase =
+        process.env.NEXT_PUBLIC_ADMIN_API_BASE_URL || 'http://localhost:4001';
+
+      let backendUrl = `${apiBase}/admin/me`;
+      if (portalMode === 'student') {
+        backendUrl = `${apiBase}/admin/me`; // change later when student-service is ready
+      }
+      if (portalMode === 'corporate') {
+        backendUrl = `${apiBase}/admin/me`; // change later when corporate-service is ready
+      }
+
+      const res = await fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idTokenJwt}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.error('Backend /me error status:', res.status);
+
+        let backendMessage = 'Unable to verify your access.';
+        try {
+          const data = await res.json();
+          if (data && typeof data.message === 'string') {
+            backendMessage = data.message;
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+
+        await signOut();
+        setErrors({
+          email: '',
+          password: backendMessage,
+        });
+        return;
+      }
+
+      const data = await res.json();
+      console.log('Backend /me response:', data);
+
+      localStorage.setItem('originbi_id_token', idTokenJwt);
+
       onLoginSuccess();
     } catch (err: unknown) {
-      console.error('Cognito signIn error:', err);
+      console.error('Cognito signIn or backend error:', err);
 
       const message =
         err && typeof err === 'object' && 'message' in err
@@ -157,6 +224,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       setIsSubmitting(false);
     }
   };
+
 
   const isEmailInvalid = touched.email && !!errors.email;
   const isPasswordInvalid = touched.password && !!errors.password;
@@ -264,5 +332,3 @@ const LoginForm: React.FC<LoginFormProps> = ({
 };
 
 export default LoginForm;
-
-
