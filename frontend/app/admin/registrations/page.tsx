@@ -4,6 +4,8 @@ import React from 'react';
 import Header from '@/components/admin/Sidebar';
 import RegistrationManagement from '@/components/admin/RegistrationManagement';
 import { useRouter } from 'next/navigation';
+import RequireAdmin from '@/components/auth/RequireAdmin';   // ✅ added
+
 
 export default function RegistrationsPage() {
     const router = useRouter();
@@ -19,11 +21,13 @@ export default function RegistrationsPage() {
     };
 
     return (
+        <RequireAdmin>   {/* 👈 protect this whole page */}
         <div className="min-h-screen bg-transparent">
             <Header onLogout={handleLogout} currentView="registrations" portalMode="admin" />
             <main className="p-6">
                 <RegistrationManagement />
             </main>
         </div>
+        </RequireAdmin>
     );
 }
