@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import Header from '@/components/admin/Sidebar';
+import Header from '@/components/admin/Header';
 import ProgramsManagement from '@/components/admin/ProgramsManagement';
 import { useRouter } from 'next/navigation';
 
@@ -13,10 +13,24 @@ export default function RegistrationsPage() {
         router.push('/admin/login');
     };
 
-    const handleNavigate = (view: 'dashboard' | 'programs') => {
-        if (view === 'dashboard') router.push('/admin');
-        if (view === 'programs') router.push('/admin/programs');
-    };
+const handleNavigate = (
+    view: 'dashboard' | 'programs' | 'corporate' | 'registrations'
+  ) => {
+    switch (view) {
+      case 'dashboard':
+        router.push('/admin/dashboard');
+        break;
+      case 'programs':
+        router.push('/admin/programs');
+        break;
+      case 'corporate':
+        router.push('/admin/corporate');
+        break;
+      case 'registrations':
+        router.push('/admin/registrations');
+        break;
+    }
+  };
 
     return (
         <div className="min-h-screen bg-transparent">
