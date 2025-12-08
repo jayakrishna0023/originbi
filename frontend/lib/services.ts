@@ -4,7 +4,7 @@ import { RegistrationUser, Program, Department, ProgramData, CorporateRegistrati
 
 // Toggle this to true when backend is ready
 const USE_REAL_API = false;
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_ADMIN_API_BASE_URL || 'http://localhost:3000/api';
 
 // --- Shared Interfaces ---
 
