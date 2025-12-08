@@ -40,13 +40,6 @@ export interface RegistrationUser {
   status: boolean;
 }
 
-// Dropdown Data Types
-export interface Program {
-  id: string;
-  name: string; // e.g., "School Students", "College Students", "Employee"
-  code: string;
-}
-
 export interface Department {
   id: string;
   name: string; // e.g., "Computer Science", "Mechanical"
@@ -58,55 +51,18 @@ export interface CountryCode {
   flag: string;
 }
 
-// --- Program Module Types ---
-export interface ProgramData {
+// Dropdown Data Types
+export interface Program {
   id: string;
-  programCode: string;
-  programName: string;
-  description?: string;
-  assessmentTitle?: string;
-  reportTitle?: string;
+  programCode: string;      // e.g. "SCHOOL_STUDENT"
+  programName: string;      // e.g. "School Students"
+  status: boolean;
+  description: string;
+  assessmentTitle: string;
+  reportTitle: string;
   isDemo: boolean;
-  status: boolean;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-export interface CorporateRegistrationUser {
-  id: string;
-  name: string;
-  gender: "Male" | "Female" | "Other";
-  avatar: string;        // if sometimes missing, make this avatar?: string;
-  email: string;
-  countryCode: string;
-  mobile: string;
-  companyName: string;
-  jobTitle?: string;
-  employeeCode?: string;
-  linkedinUrl?: string;
-  sector: SectorCode;
-  credits?: number;
-  status: boolean;
-  notes?: string;         // used as "Business Locations" in UI
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateCorporateRegistrationDto {
-  name: string;
-  gender: "Male" | "Female" | "Other";
-  avatar: string;        // if sometimes missing, make this avatar?: string;
-  email: string;
-  countryCode: string;
-  mobile: string;
-  companyName: string;
-  jobTitle?: string;
-  employeeCode?: string;
-  linkedinUrl?: string;
-  sector: SectorCode;
-  password: string;
-  credits?: number;
-  status: boolean;
-  notes?: string;         // label: Business Locations
-  sendEmail?: boolean;    // optional, not shown in UI, we will send false
-}
+// --- Program Module Types ---
+// This keeps old code using ProgramData working
+export type ProgramData = Program;
