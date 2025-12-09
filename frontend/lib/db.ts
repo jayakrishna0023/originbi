@@ -1,0 +1,9 @@
+// lib/db.ts  (or src/lib/db.ts)
+import { neon } from '@neondatabase/serverless';
+
+// This uses the DATABASE_URL from your .env.local / Vercel
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set');
+}
+
+export const sql = neon(process.env.DATABASE_URL);
