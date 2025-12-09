@@ -100,7 +100,7 @@ export const registrationService = {
       ? (body as any).data
       : [];
 
-    console.log("Programs loaded from API:", list);
+    //console.log("Programs loaded from API:", list);
 
     return list.map((p: any) => ({
       id: String(p.id),
