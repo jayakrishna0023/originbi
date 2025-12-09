@@ -100,7 +100,7 @@ export const registrationService = {
       ? (body as any).data
       : [];
 
-    //console.log("Programs loaded from API:", list);
+    console.log("Programs loaded from API:", list);
 
     return list.map((p: any) => ({
       id: String(p.id),
@@ -179,6 +179,27 @@ export const registrationService = {
 
     if (!res.ok) {
       throw new Error("Failed to update registration status");
+    }
+  },
+  // 🔹 BULK UPLOAD registrations
+  async bulkUpload(file: File): Promise<void> {
+    const token = AuthService.getToken();
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${API_URL}/registrations/bulk-upload`, {
+      method: "POST",
+      headers: {
+        // Do NOT set Content-Type manually; browser will set multipart boundary
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message || "Failed to upload file");
     }
   },
 };
