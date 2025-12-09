@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post, Req, Get, Query } from '@nestjs/common';
 import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 
@@ -8,8 +8,20 @@ export class RegistrationsController {
 
   @Post()
   async create(@Body() dto: CreateRegistrationDto, @Req() req: any) {
-    // later you can get admin id from req.user.id if you add auth
-    const adminId = null;
+    const adminId = null; // later: req.user.id
     return this.registrationsService.create(dto, adminId);
+  }
+
+  // 🔹 NEW: list registrations for the table
+  @Get()
+  async list(
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+    @Query('tab') tab?: string,
+    @Query('search') search?: string,
+  ) {
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    return this.registrationsService.findAll(pageNum, limitNum, tab, search);
   }
 }

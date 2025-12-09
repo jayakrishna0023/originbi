@@ -1,7 +1,6 @@
 // src/lib/registrationService.ts
 
 import { RegistrationUser, Program, Department } from "./types";
-import axios from 'axios';
 
 // All admin-side APIs (programs, departments, registrations) from NestJS admin-service
 const API_URL =
@@ -101,7 +100,7 @@ export const registrationService = {
       ? (body as any).data
       : [];
 
-    console.log("Programs loaded from API:", list);
+    //console.log("Programs loaded from API:", list);
 
     return list.map((p: any) => ({
       id: String(p.id),
@@ -147,7 +146,7 @@ export const registrationService = {
   },
 
   // 🔹 CREATE registration (on Submit of AddRegistrationForm)
-  /*async createUser(data: CreateRegistrationDto): Promise<void> {
+  async createUser(data: CreateRegistrationDto): Promise<void> {
     const token = AuthService.getToken();
 
     const res = await fetch(`${API_URL}/registrations`, {
@@ -163,19 +162,6 @@ export const registrationService = {
       const err = await res.json().catch(() => null);
       throw new Error(err?.message || "Failed to create registration");
     }
-  },*/
-
-  async createUser(data: CreateRegistrationDto) {
-    const token = AuthService.getToken();
-
-    const res = await axios.post(`${API_URL}/registrations`, data, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-    });
-
-    return res.data;
   },
 
   // 🔹 Toggle status from list (if you use it)
@@ -193,27 +179,6 @@ export const registrationService = {
 
     if (!res.ok) {
       throw new Error("Failed to update registration status");
-    }
-  },
-  // 🔹 BULK UPLOAD registrations
-  async bulkUpload(file: File): Promise<void> {
-    const token = AuthService.getToken();
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch(`${API_URL}/registrations/bulk-upload`, {
-      method: "POST",
-      headers: {
-        // Do NOT set Content-Type manually; browser will set multipart boundary
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => null);
-      throw new Error(err?.message || "Failed to upload file");
     }
   },
 };

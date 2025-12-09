@@ -55,7 +55,4 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @Column({ name: 'corporate_account_id', type: 'bigint', nullable: true })
-  corporateAccountId?: number;
 }
