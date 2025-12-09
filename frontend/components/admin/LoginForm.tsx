@@ -95,7 +95,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         password: values.password,
       });
 
-      console.log('signInResult:', signInResult);
+      //console.log('signInResult:', signInResult);
 
       if (!signInResult.isSignedIn) {
         setErrors({
@@ -108,7 +108,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       // 2️⃣ Get tokens & groups
       const session = await fetchAuthSession();
-      console.log('full session:', session);
+      //console.log('full session:', session);
 
       const { tokens } = session;
 
@@ -129,8 +129,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
         return;
       }
 
-      console.log('ID TOKEN PAYLOAD', tokens.idToken?.payload);
-      console.log('ACCESS TOKEN PAYLOAD', tokens.accessToken?.payload);
+      //console.log('ID TOKEN PAYLOAD', tokens.idToken?.payload);
+      //console.log('ACCESS TOKEN PAYLOAD', tokens.accessToken?.payload);
 
       const idGroups =
         (tokens.idToken?.payload['cognito:groups'] as string[] | undefined) || [];
@@ -140,8 +140,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       const groups = [...new Set([...idGroups, ...accessGroups])];
 
-      console.log('Groups merged from tokens:', groups);
-      console.log('Portal mode:', portalMode);
+      //console.log('Groups merged from tokens:', groups);
+      //console.log('Portal mode:', portalMode);
 
       // 3️⃣ Required group based on portal
       let requiredGroup = '';
@@ -149,7 +149,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       if (portalMode === 'student') requiredGroup = 'STUDENT';
       if (portalMode === 'corporate') requiredGroup = 'CORPORATE';
 
-      console.log('Required group for this portal:', requiredGroup);
+      //console.log('Required group for this portal:', requiredGroup);
 
       // 4️⃣ Client-side group restriction
       if (requiredGroup && !groups.includes(requiredGroup)) {
@@ -203,7 +203,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       }
 
       const data = await res.json();
-      console.log('Backend /me response:', data);
+      //console.log('Backend /me response:', data);
 
       localStorage.setItem('originbi_id_token', idTokenJwt);
 

@@ -14,11 +14,9 @@ export class Registration {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  // ✅ FK column
   @Column({ name: 'user_id', type: 'bigint' })
   userId: number;
 
-  // ✅ Relation
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
@@ -32,14 +30,14 @@ export class Registration {
   @Column({ name: 'created_by_user_id', type: 'bigint', nullable: true })
   createdByUserId: number | null;
 
-  @Column({ name: 'exam_start', type: 'timestamptz', nullable: true })
-  examStart?: Date | null;
-
-  @Column({ name: 'exam_end', type: 'timestamptz', nullable: true })
-  examEnd?: Date | null;
+  // ❌ REMOVE exam_start, exam_end — they are NOT in your DB
+  // They will be stored inside metadata JSON instead.
 
   @Column({ name: 'metadata', type: 'jsonb', default: () => `'{}'` })
   metadata: any;
+
+  @Column({ name: 'is_deleted', type: 'boolean', default: false })
+  isDeleted: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

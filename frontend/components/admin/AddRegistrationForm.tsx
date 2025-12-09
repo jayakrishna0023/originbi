@@ -66,7 +66,7 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
       // 1) Programs
       try {
         const progRes = await registrationService.getPrograms();
-        console.log("Programs in form:", progRes);
+        //console.log("Programs in form:", progRes);
         setPrograms(progRes);
       } catch (err) {
         console.error("Failed to load programs", err);
@@ -75,7 +75,7 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
       // 2) Departments (optional)
       try {
         const deptRes = await registrationService.getDepartments();
-        console.log("Departments in form:", deptRes);
+        //console.log("Departments in form:", deptRes);
         setDepartments(deptRes);
       } catch (err) {
         console.error("Failed to load departments", err);
@@ -149,7 +149,7 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
   };
 
   const programOptions = programs.map((p) => ({ value: p.id, label: p.name }));
-  console.log("programOptions:", programOptions);
+  //console.log("programOptions:", programOptions);
 
   const departmentOptions = departments.map((d) => ({
     value: d.id,

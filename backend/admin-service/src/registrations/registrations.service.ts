@@ -79,4 +79,53 @@ export class RegistrationsService {
       };
     });
   }
+
+  // ---------------------------------------------------------
+// 🔹 LIST REGISTRATIONS FOR FRONTEND TABLE
+// ---------------------------------------------------------
+async findAll(
+  page: number,
+  limit: number,
+  tab?: string,
+  search?: string,
+) {
+  const qb = this.regRepo
+    .createQueryBuilder('r')
+    .leftJoinAndSelect('r.user', 'u')
+    .where('r.isDeleted = false');
+
+  if (search) {
+    const s = `%${search.toLowerCase()}%`;
+    qb.andWhere('(LOWER(u.fullName) LIKE :s OR LOWER(u.email) LIKE :s)', { s });
+  }
+
+  const total = await qb.getCount();
+
+  const rows = await qb
+    .orderBy('r.createdAt', 'DESC')
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getMany();
+
+  const data = rows.map((r) => ({
+    id: r.id,
+    userId: r.userId,
+    name: r.user?.fullName ?? null,
+    email: r.user?.email ?? null,
+    mobile: r.metadata?.mobile ?? null,
+    programType: r.metadata?.programType ?? null,
+    status: r.status,
+    examStart: r.metadata?.examStart ?? null,
+    examEnd: r.metadata?.examEnd ?? null,
+    createdAt: r.createdAt,
+  }));
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+  };
+}
+
 }
