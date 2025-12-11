@@ -1,8 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
+// auth-service/src/cognito/cognito.controller.ts
+import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { CognitoService } from './cognito.service';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 class CreateCognitoUserDto {
+  @IsEmail()
   email: string;
+
+  @IsNotEmpty()
   password: string;
 }
 
@@ -12,11 +17,22 @@ export class CognitoController {
 
   @Post('users')
   async createUser(@Body() body: CreateCognitoUserDto) {
+    console.log('[auth-service] /internal/cognito/users body =', body);
+
     const { email, password } = body;
-    const result = await this.cognitoService.createUserWithPermanentPassword(
-      email,
-      password,
-    );
-    return result; // { sub: '...' }
+
+    // Extra safety (even though class-validator already checks)
+    if (!email || !password) {
+      throw new BadRequestException('email and password are required');
+    }
+
+    const result =
+      await this.cognitoService.createUserWithPermanentPassword(
+        email,
+        password,
+      );
+
+    console.log('[auth-service] Cognito result =', result);
+    return result;
   }
 }

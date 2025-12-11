@@ -1,17 +1,21 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2017",
-    "lib": ["es2017", "dom"],
-    "moduleResolution": "node",
+    "declaration": true,
+    "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "strict": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  }
+    "incremental": true,
+
+    // 🔴 ADD THESE TWO LINES
+    "moduleResolution": "node",
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -6,22 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CognitoService = void 0;
+exports.CognitoModule = void 0;
 const common_1 = require("@nestjs/common");
-let CognitoService = class CognitoService {
-    async createUserWithPermanentPassword(email, password) {
-        console.log('[CognitoService] createUserWithPermanentPassword called with:', {
-            email,
-            password,
-        });
-        return {
-            sub: 'test-sub-123',
-            email,
-        };
-    }
+const cognito_controller_1 = require("./cognito.controller");
+const cognito_service_1 = require("./cognito.service");
+let CognitoModule = class CognitoModule {
 };
-exports.CognitoService = CognitoService;
-exports.CognitoService = CognitoService = __decorate([
-    (0, common_1.Injectable)()
-], CognitoService);
-//# sourceMappingURL=cognito.service.js.map
+exports.CognitoModule = CognitoModule;
+exports.CognitoModule = CognitoModule = __decorate([
+    (0, common_1.Module)({
+        controllers: [cognito_controller_1.CognitoController],
+        providers: [cognito_service_1.CognitoService],
+        exports: [cognito_service_1.CognitoService],
+    })
+], CognitoModule);
+//# sourceMappingURL=cognito.module.js.map

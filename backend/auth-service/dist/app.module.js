@@ -1,5 +1,4 @@
 "use strict";
-// backend/auth-service/src/app.module.ts
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,8 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
-const cognito_service_1 = require("./cognito/cognito.service");
-const cognito_controller_1 = require("./cognito/cognito.controller");
+const cognito_module_1 = require("./cognito/cognito.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -20,11 +18,9 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: '.env',
             }),
+            cognito_module_1.CognitoModule,
         ],
-        controllers: [cognito_controller_1.CognitoController],
-        providers: [cognito_service_1.CognitoService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
