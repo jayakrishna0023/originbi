@@ -1,0 +1,1 @@
+{"version":3,"file":"cognito.config.js","sourceRoot":"","sources":["../../src/cognito/cognito.config.ts"],"names":[],"mappings":";;;;AAQa,QAAA,aAAa,GAAG;IAC3B,MAAM,EAAE,MAAA,OAAO,CAAC,GAAG,CAAC,cAAc,mCAAI,YAAY;IAClD,UAAU,EAAE,MAAA,OAAO,CAAC,GAAG,CAAC,oBAAoB,mCAAI,EAAE;IAClD,QAAQ,EAAE,MAAA,OAAO,CAAC,GAAG,CAAC,iBAAiB,mCAAI,EAAE;CAC9C,CAAC"}
