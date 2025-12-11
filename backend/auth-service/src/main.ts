@@ -11,6 +11,6 @@ async function bootstrap() {
   });
 
   await app.listen(4002); // IMPORTANT: this port must match admin-service .env
-  console.log('Auth-service running on http://localhost:4002');
+  //console.log('Auth-service running on http://localhost:4002');
 }
 bootstrap();
