@@ -9,7 +9,7 @@ import { Request } from 'express';
 import { AdminLoginService } from './adminlogin.service';
 
 // Path: admin-service/src/adminlogin → up to backend → auth-service/src/cognito
-import { verifyCognitoIdToken } from '../../../auth-service/src/cognito/verify-id-token';
+import { verifyCognitoIdToken } from '../auth/verify-id-token';
 
 @Injectable()
 export class AdminLoginGuard implements CanActivate {

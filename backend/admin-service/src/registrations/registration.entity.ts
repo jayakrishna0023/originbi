@@ -64,18 +64,20 @@ export class Registration {
 
   // ---- Education Links ----
   @Column({
-    name: 'school_level_id',
-    type: 'smallint',
-    nullable: true, // ✅ you made this column nullable in DB
+    name: 'school_level',
+    type: 'varchar',
+    length: 20,
+    nullable: true, // valid for UG, College, etc.
   })
-  schoolLevelId: number | null;
+  schoolLevel: string | null;
 
   @Column({
-    name: 'school_stream_id',
-    type: 'smallint',
+    name: 'school_stream',
+    type: 'varchar',
+    length: 20,
     nullable: true,
   })
-  schoolStreamId: number | null;
+  schoolStream: string | null;
 
   @Column({
     name: 'department_degree_id',
