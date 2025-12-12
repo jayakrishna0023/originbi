@@ -1,36 +1,56 @@
 // auth-service/src/cognito/cognito.controller.ts
-import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
+
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+} from '@nestjs/common';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { CognitoService } from './cognito.service';
-import { IsEmail, IsNotEmpty } from 'class-validator';
 
 class CreateCognitoUserDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
+  @IsString()
   @IsNotEmpty()
   password: string;
+
+  // Optional: if you want to pass group from admin-service later
+  @IsOptional()
+  @IsString()
+  groupName?: string;
 }
 
 @Controller('internal/cognito')
 export class CognitoController {
   constructor(private readonly cognitoService: CognitoService) {}
 
+  /**
+   * Create user in Cognito with permanent password.
+   * POST /internal/cognito/users
+   */
   @Post('users')
   async createUser(@Body() body: CreateCognitoUserDto) {
-    console.log('[auth-service] /internal/cognito/users body =', body);
+    console.log('[auth-service] /internal/cognito/users body =', {
+      ...body,
+      password: body.password ? '***hidden***' : undefined, // do not log real password
+    });
 
-    const { email, password } = body;
+    const { email, password, groupName } = body;
 
-    // Extra safety (even though class-validator already checks)
     if (!email || !password) {
       throw new BadRequestException('email and password are required');
     }
 
-    const result =
-      await this.cognitoService.createUserWithPermanentPassword(
-        email,
-        password,
-      );
+    // If group not sent, default to STUDENT
+    const result = await this.cognitoService.createUserWithPermanentPassword(
+      email,
+      password,
+      groupName || 'STUDENT',
+    );
 
     console.log('[auth-service] Cognito result =', result);
     return result;
