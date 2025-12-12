@@ -14,29 +14,26 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CognitoController = void 0;
 const common_1 = require("@nestjs/common");
-const cognito_service_1 = require("./cognito.service");
 const class_validator_1 = require("class-validator");
+const cognito_service_1 = require("./cognito.service");
 class CreateCognitoUserDto {
 }
 __decorate([
     (0, class_validator_1.IsEmail)(),
-    __metadata("design:type", String)
-], CreateCognitoUserDto.prototype, "email", void 0);
-__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateCognitoUserDto.prototype, "password", void 0);
+], CreateCognitoUserDto.prototype, "email", void 0);
 let CognitoController = class CognitoController {
     constructor(cognitoService) {
         this.cognitoService = cognitoService;
     }
     async createUser(body) {
         console.log('[auth-service] /internal/cognito/users body =', body);
-        const { email, password } = body;
-        if (!email || !password) {
-            throw new common_1.BadRequestException('email and password are required');
+        const { email } = body;
+        if (!email) {
+            throw new common_1.BadRequestException('email is required');
         }
-        const result = await this.cognitoService.createUserWithPermanentPassword(email, password);
+        const result = await this.cognitoService.createStudentUser(email);
         console.log('[auth-service] Cognito result =', result);
         return result;
     }

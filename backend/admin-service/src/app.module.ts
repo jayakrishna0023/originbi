@@ -9,25 +9,23 @@ import { AdminLoginModule } from './adminlogin/adminlogin.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 
+const isProd = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
-    // Load .env (includes DATABASE_URL)
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: isProd ? '.env.production' : '.env.local',
     }),
 
-    // Use Neon DATABASE_URL instead of separate host/user/pass
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,   // <<--- Neon URL from .env
-      entities: [AdminUser],
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: false,
-      ssl: {
-        rejectUnauthorized: false,     // required for Neon TLS
-      },
+
+      // SSL only in production (Neon)
+      ssl: isProd ? { rejectUnauthorized: false } : false,
     }),
 
     AdminLoginModule,
@@ -35,7 +33,6 @@ import { RegistrationsModule } from './registrations/registrations.module';
     ProgramsModule,
     DepartmentsModule,
     RegistrationsModule,
-
   ],
 })
 export class AppModule {}

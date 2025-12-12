@@ -25,7 +25,7 @@ export class RegistrationsService {
 
   constructor(
     @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
+    private readonly userRepo: Repository<User>, // (kept even if not used directly)
 
     @InjectRepository(Registration)
     private readonly regRepo: Repository<Registration>,
@@ -37,13 +37,19 @@ export class RegistrationsService {
   // ---------------------------------------------------------
   // 🔹 Helper: Call auth-service to create a Cognito user
   // ---------------------------------------------------------
-  private async createCognitoUser(email: string) {
-    const password = 'Origin@1234'; // later you can generate a random one
-
+  private async createCognitoUser(email: string, password: string) {
     console.log('[RegistrationsService] createCognitoUser email =', email);
+    console.log(
+      '[RegistrationsService] createCognitoUser password =',
+      '***hidden***',
+    );
 
     if (!email) {
       throw new BadRequestException('Email is required for Cognito user');
+    }
+
+    if (!password) {
+      throw new BadRequestException('Password is required for Cognito user');
     }
 
     try {
@@ -53,19 +59,24 @@ export class RegistrationsService {
       );
 
       const res = await firstValueFrom(res$);
+
       console.log(
         '[RegistrationsService] auth-service /internal/cognito/users response =',
         res.data,
       );
 
       return res.data as { sub?: string };
-    } catch (err) {
+    } catch (err: any) {
+      const authErr = err?.response?.data || err?.message || err;
+
       console.error(
         '[RegistrationsService] Error calling auth-service /internal/cognito/users:',
-        err?.response?.data || err.message || err,
+        authErr,
       );
+
+      // return actual message from auth-service if present (helps debugging)
       throw new InternalServerErrorException(
-        'Failed to create Cognito user via auth-service',
+        authErr?.message || 'Failed to create Cognito user via auth-service',
       );
     }
   }
@@ -74,10 +85,19 @@ export class RegistrationsService {
   // 🔹 CREATE REGISTRATION (called by frontend)
   // ---------------------------------------------------------
   async create(dto: CreateRegistrationDto, createdByUserId?: number | null) {
-    console.log('[RegistrationsService] create dto =', dto);
+    console.log('[RegistrationsService] create dto =', {
+      ...dto,
+      password: dto.password ? '***hidden***' : undefined, // do not log password
+    });
 
     // 1) Create Cognito user via auth-service
-    const { sub } = await this.createCognitoUser(dto.email);
+    const { sub } = await this.createCognitoUser(dto.email, dto.password);
+
+    if (!sub) {
+      throw new InternalServerErrorException(
+        'Cognito sub not returned from auth-service',
+      );
+    }
 
     // 2) Wrap DB operations in a transaction
     return this.dataSource.transaction(async (manager) => {
@@ -108,8 +128,7 @@ export class RegistrationsService {
         registrationSource,
         createdByUserId: createdByUserId ?? null,
         status,
-        // Your SQL table does NOT have exam_start / exam_end columns,
-        // so we store those inside metadata:
+        // Store additional fields in metadata
         metadata: {
           gender: dto.gender,
           programType: dto.programType,
@@ -137,12 +156,7 @@ export class RegistrationsService {
   // ---------------------------------------------------------
   // 🔹 LIST REGISTRATIONS FOR FRONTEND TABLE
   // ---------------------------------------------------------
-  async findAll(
-    page: number,
-    limit: number,
-    tab?: string,
-    search?: string,
-  ) {
+  async findAll(page: number, limit: number, tab?: string, search?: string) {
     const qb = this.regRepo
       .createQueryBuilder('r')
       .leftJoinAndSelect('r.user', 'u')
@@ -150,10 +164,9 @@ export class RegistrationsService {
 
     if (search) {
       const s = `%${search.toLowerCase()}%`;
-      qb.andWhere(
-        '(LOWER(u.fullName) LIKE :s OR LOWER(u.email) LIKE :s)',
-        { s },
-      );
+      qb.andWhere('(LOWER(u.fullName) LIKE :s OR LOWER(u.email) LIKE :s)', {
+        s,
+      });
     }
 
     const total = await qb.getCount();

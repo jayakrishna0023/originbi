@@ -1,6 +1,11 @@
 export declare class CognitoService {
-    createUserWithPermanentPassword(email: string, password: string): Promise<{
-        sub: string;
+    private cognitoClient;
+    private userPoolId;
+    constructor();
+    private generateRandomPassword;
+    createStudentUser(email: string): Promise<{
         email: string;
+        group: string;
+        password: string;
     }>;
 }
