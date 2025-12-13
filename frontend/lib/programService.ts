@@ -9,7 +9,7 @@ export interface PaginatedResponse<T> {
 }
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
+  process.env.NEXT_PUBLIC_ADMIN_API_BASE_URL || "http://localhost:4001";
 
 // ------------------------------
 // Mapping helpers
