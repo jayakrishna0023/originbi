@@ -18,6 +18,7 @@ import { AssessmentAttempt } from '../assessment/assessment_attempt.entity';
 import { AssessmentLevel } from '../assessment/assessment_level.entity';
 import { GroupsService } from '../groups/groups.service';
 import { AssessmentGenerationService } from '../assessment/assessment-generation.service';
+import { getWelcomeEmailTemplate } from '../mail/templates/welcome.template';
 
 import * as nodemailer from 'nodemailer';
 import { SES } from 'aws-sdk';
@@ -184,12 +185,17 @@ export class RegistrationsService {
       await manager.save(registration);
 
       // D. Create Assessment Session
-      // Fetch a valid Program (e.g., first active one or matching type if we had logic)
-      const defaultProgram = await manager.getRepository(Program).findOne({ where: { is_active: true } });
-      if (!defaultProgram) {
-        throw new BadRequestException('No active Program found in the system. Please create a Program first.');
+      // Use the selected Program ID from the DTO
+      const programId = Number(dto.programType);
+
+      // Verify the program is valid and active
+      const selectedProgram = await manager.getRepository(Program).findOne({
+        where: { id: dto.programType, is_active: true }
+      });
+
+      if (!selectedProgram) {
+        throw new BadRequestException('Selected Program not found or is inactive.');
       }
-      const programId = Number(defaultProgram.id);
 
       const validFrom = dto.examStart ? new Date(dto.examStart) : new Date();
       const validTo = dto.examEnd ? new Date(dto.examEnd) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 days default
@@ -243,7 +249,8 @@ export class RegistrationsService {
       // H. Send Email (Best Effort)
       if (dto.sendEmail && dto.password) {
         try {
-          await this.sendWelcomeEmail(dto.email, dto.name, dto.password);
+          const title = selectedProgram.assessment_title || selectedProgram.name;
+          await this.sendWelcomeEmail(dto.email, dto.name, dto.password, dto.examStart, title);
         } catch (emailErr) {
           this.logger.error('Failed to send welcome email', emailErr);
           // Do not rollback
@@ -307,7 +314,7 @@ export class RegistrationsService {
   // ---------------------------------------------------------
   // Helper: Send Welcome Email
   // ---------------------------------------------------------
-  private async sendWelcomeEmail(to: string, name: string, pass: string) {
+  private async sendWelcomeEmail(to: string, name: string, pass: string, startDateTime?: Date | string, assessmentTitle?: string) {
     const ses = new SES({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -321,28 +328,7 @@ export class RegistrationsService {
       to,
       cc: ccEmail, // Add CC if configured
       subject: 'Welcome to OriginBI - Your Assessment is Ready!',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-          <h2 style="color: #4CAF50;">Welcome to OriginBI!</h2>
-          <p>Dear <strong>${name}</strong>,</p>
-          <p>Your account has been successfully created and your assessment is ready to begin.</p>
-          
-          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Username / Email:</strong> ${to}</p>
-            <p style="margin: 5px 0;"><strong>Password:</strong> ${pass}</p>
-          </div>
-
-          <p>Please click the button below to login and start your assessment:</p>
-          <p style="text-align: center;">
-            <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Dashboard</a>
-          </p>
-
-          <p style="font-size: 12px; color: #888; margin-top: 30px; text-align: center;">
-            If the button above doesn't work, copy this link: http://localhost:3000/login<br>
-            Please change your password immediately after logging in for the first time.
-          </p>
-        </div>
-      `,
+      html: getWelcomeEmailTemplate(name, to, pass, process.env.FRONTEND_URL || 'http://localhost:3000', startDateTime, assessmentTitle),
     };
     return transporter.sendMail(mailOptions);
   }

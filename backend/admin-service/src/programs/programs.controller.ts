@@ -22,11 +22,14 @@ export class ProgramsController {
     @Query('page') page = '1',
     @Query('limit') limit = '50',
     @Query('search') search?: string,
+    @Query('is_active') is_active?: string,
   ) {
+    const isActiveBool = is_active === 'true' ? true : (is_active === 'false' ? false : undefined);
     return this.programsService.findAll(
       parseInt(page, 10),
       parseInt(limit, 10),
       search,
+      isActiveBool
     );
   }
 

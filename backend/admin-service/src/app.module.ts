@@ -9,6 +9,7 @@ import { DepartmentsModule } from './departments/departments.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { GroupsModule } from './groups/groups.module';
 import { AssessmentModule } from './assessment/assessment.module';
+import { TestController } from './test/test.controller';
 
 @Module({
   imports: [
@@ -58,5 +59,6 @@ import { AssessmentModule } from './assessment/assessment.module';
     GroupsModule,
     AssessmentModule,
   ],
+  controllers: [TestController],
 })
 export class AppModule { }

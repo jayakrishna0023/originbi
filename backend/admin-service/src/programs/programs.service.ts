@@ -10,16 +10,22 @@ export class ProgramsService {
     private readonly programRepo: Repository<Program>,
   ) { }
 
-  async findAll(page = 1, limit = 50, search?: string) {
+  async findAll(page = 1, limit = 50, search?: string, isActive?: boolean) {
     try {
       const skip = (page - 1) * limit;
 
-      const where = search
-        ? [
-          { name: ILike(`%${search}%`) },
-          { code: ILike(`%${search}%`) },
-        ]
-        : undefined;
+      let where: any = {};
+
+      if (isActive !== undefined) {
+        where.is_active = isActive;
+      }
+
+      if (search) {
+        where = [
+          { name: ILike(`%${search}%`), ...(isActive !== undefined ? { is_active: isActive } : {}) },
+          { code: ILike(`%${search}%`), ...(isActive !== undefined ? { is_active: isActive } : {}) },
+        ];
+      }
 
       const [data, total] = await this.programRepo.findAndCount({
         where,
