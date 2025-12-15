@@ -2,7 +2,7 @@ import { CorporateAccount, CreateCorporateRegistrationDto, PaginatedResponse } f
 import { AuthService } from "./auth.service";
 
 const API_URL =
-    process.env.NEXT_PUBLIC_ADMIN_API_BASE_URL || "http://localhost:4000";
+    process.env.NEXT_PUBLIC_ADMIN_API_BASE_URL || "http://localhost:4001";
 
 export const corporateRegistrationService = {
     // List registrations with pagination + search
@@ -117,5 +117,45 @@ export const corporateRegistrationService = {
         if (!res.ok) {
             throw new Error("Failed to update credits");
         }
+    },
+    // Delete
+    async deleteRegistration(id: string): Promise<void> {
+        const token = AuthService.getToken();
+        const res = await fetch(`${API_URL}/admin/corporate-accounts/${id}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: token ? `Bearer ${token}` : "",
+            },
+        });
+        if (!res.ok) throw new Error("Failed to delete registration");
+    },
+
+    // Update (General)
+    async updateRegistration(id: string, data: Partial<CreateCorporateRegistrationDto>): Promise<CorporateAccount> {
+        const token = AuthService.getToken();
+        const res = await fetch(`${API_URL}/admin/corporate-accounts/${id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: token ? `Bearer ${token}` : "",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to update registration");
+        return res.json();
+    },
+
+    // Block/Unblock
+    async toggleBlockStatus(id: string, isBlocked: boolean): Promise<void> {
+        const token = AuthService.getToken();
+        const res = await fetch(`${API_URL}/admin/corporate-accounts/${id}/block`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: token ? `Bearer ${token}` : "",
+            },
+            body: JSON.stringify({ is_blocked: isBlocked }),
+        });
+        if (!res.ok) throw new Error("Failed to update status");
     },
 };
