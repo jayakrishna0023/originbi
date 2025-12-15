@@ -9,6 +9,7 @@ import {
 } from "@/components/icons";
 import CorporateRegistrationTable from "@/components/admin/CorporateRegistrationTable";
 import AddCorporateRegistrationForm from "@/components/admin/AddCorporateRegistrationForm";
+import CorporateDetailsView from "@/components/admin/CorporateDetailsView";
 import { CorporateAccount } from "@/lib/types";
 import { corporateRegistrationService } from "@/lib/services";
 
@@ -23,13 +24,14 @@ const useDebounce = (value: string, delay: number) => {
 };
 
 const CorporateManagement: React.FC = () => {
-  const [view, setView] = useState<"list" | "form">("list");
+  const [view, setView] = useState<"list" | "form" | "details">("list");
 
   // Data state
   // We use CorporateAccount but assume it might have extra fields like full_name from the join if the backend supports it.
   // Ideally we should import ExtendedCorporateAccount or similar if shared.
   // For now let's just use CorporateAccount[] and any extra fields for display will be handled by the table if proper casting is done.
   const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,9 +79,32 @@ const CorporateManagement: React.FC = () => {
     }
   };
 
-  // Optional view details (future modal)
+  // View details
   const handleViewDetails = (id: string) => {
-    //console.log("View corporate registration details for:", id);
+    const user = users.find(u => u.id === id);
+    if (user) {
+      setSelectedUser(user);
+      setView("details");
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    const user = users.find(u => u.id === id);
+    if (user) {
+      setSelectedUser(user);
+      setView("form");
+    }
+  };
+
+  const handleToggleBlock = async (id: string, currentBlock: boolean) => {
+    try {
+      await corporateRegistrationService.toggleBlockStatus(id, !currentBlock);
+      // Optimistic update or refresh
+      fetchData();
+    } catch (err) {
+      console.error("Failed to toggle block status", err);
+      alert("Failed to update status");
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -93,10 +118,27 @@ const CorporateManagement: React.FC = () => {
   if (view === "form") {
     return (
       <AddCorporateRegistrationForm
-        onCancel={() => setView("list")}
+        onCancel={() => {
+          setView("list");
+          setSelectedUser(null);
+        }}
         onRegister={() => {
           setView("list");
+          setSelectedUser(null);
           fetchData();
+        }}
+        initialData={selectedUser}
+      />
+    );
+  }
+
+  if (view === "details" && selectedUser) {
+    return (
+      <CorporateDetailsView
+        data={selectedUser}
+        onBack={() => {
+          setView("list");
+          setSelectedUser(null);
         }}
       />
     );
@@ -155,7 +197,10 @@ const CorporateManagement: React.FC = () => {
         {/* Right side – Add New */}
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           <button
-            onClick={() => setView("form")}
+            onClick={() => {
+              setSelectedUser(null);
+              setView("form");
+            }}
             className="flex items-center gap-2 px-4 py-2.5 bg-brand-green rounded-lg text-sm font-semibold text-white hover:bg-brand-green/90 transition-opacity shadow-lg shadow-brand-green/20"
           >
             <span>Add New</span>
@@ -224,6 +269,8 @@ const CorporateManagement: React.FC = () => {
         error={error}
         onToggleStatus={handleToggleStatus}
         onViewDetails={handleViewDetails}
+        onEdit={handleEdit}
+        onToggleBlock={handleToggleBlock}
       />
     </div>
   );

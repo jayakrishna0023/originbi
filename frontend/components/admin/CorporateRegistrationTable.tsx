@@ -25,6 +25,8 @@ interface RegistrationTableProps {
   error: string | null;
   onToggleStatus: (id: string, currentStatus: boolean) => void;
   onViewDetails?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onToggleBlock?: (id: string, currentBlock: boolean) => void;
 }
 
 const getCountryInfo = (dial: string | undefined) => {
@@ -45,6 +47,8 @@ const CorporateRegistrationTable: React.FC<RegistrationTableProps> = ({
   error,
   onToggleStatus,
   onViewDetails,
+  onEdit,
+  onToggleBlock,
 }) => {
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-brand-light-tertiary dark:border-brand-dark-tertiary bg-brand-light-primary dark:bg-brand-dark-primary min-h-[400px] relative">
@@ -107,6 +111,9 @@ const CorporateRegistrationTable: React.FC<RegistrationTableProps> = ({
             </th>
             <th className="p-4 text-xs font-semibold text-brand-text-light-secondary dark:text-brand-text-secondary uppercase tracking-wider cursor-pointer text-center">
               Status
+            </th>
+            <th className="p-4 text-xs font-semibold text-brand-text-light-secondary dark:text-brand-text-secondary uppercase tracking-wider cursor-pointer text-center">
+              BANNED
             </th>
             <th className="p-4 text-xs font-semibold text-brand-text-light-secondary dark:text-brand-text-secondary uppercase tracking-wider text-right">
               Action
@@ -186,24 +193,46 @@ const CorporateRegistrationTable: React.FC<RegistrationTableProps> = ({
                 </td>
                 <td className="p-4 flex justify-center">
                   <ToggleSwitch
-                    isOn={user.is_active}
-                    onToggle={() => onToggleStatus(user.id, user.is_active)}
+                    isOn={!!user.is_active}
+                    onToggle={() => onToggleStatus(user.id, !!user.is_active)}
                   />
                 </td>
+                <td className="p-4">
+                  <div className="flex justify-center">
+                    <ToggleSwitch
+                      isOn={!!user.is_blocked}
+                      onToggle={() => onToggleBlock?.(user.id, !!user.is_blocked)}
+                      activeColor="bg-red-500"
+                      onLabel="YES"
+                      offLabel="NO"
+                    />
+                  </div>
+                </td>
                 <td className="p-4 text-right">
-                  <button
-                    onClick={() => onViewDetails && onViewDetails(user.id)}
-                    className="p-2 text-brand-green hover:bg-brand-green/10 rounded-lg transition-colors"
-                  >
-                    <EyeVisibleIcon className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => onViewDetails && onViewDetails(user.id)}
+                      className="p-2 text-brand-green hover:bg-brand-green/10 rounded-lg transition-colors"
+                      title="View Details"
+                    >
+                      <EyeVisibleIcon className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => onEdit && onEdit(user.id)}
+                      className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+
+                  </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
               <td
-                colSpan={8}
+                colSpan={9}
                 className="p-8 text-center text-brand-text-light-secondary dark:text-gray-500"
               >
                 {loading ? "Loading..." : "No records found."}
