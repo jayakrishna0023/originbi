@@ -175,8 +175,14 @@ export interface CreateCorporateRegistrationDto {
   companyName: string;
   sector: SectorCode;
   businessLocations: string;
-  credits: number;
-  // ... maps to fields in CorporateAccount
+  credits?: number; // Optional on frontend form, backend might default it
+  password?: string;
+  gender?: Gender;
+  jobTitle?: string;
+  employeeCode?: string;
+  linkedinUrl?: string;
+  status: boolean;
+  sendEmail?: boolean;
 }
 
 // Common Shared Types

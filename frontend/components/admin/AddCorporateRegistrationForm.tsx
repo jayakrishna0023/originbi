@@ -24,7 +24,7 @@ const AddCorporateRegistrationForm: React.FC<
     CreateCorporateRegistrationDto & { avatar?: string }
   >({
     name: "",
-    gender: "Female",
+    gender: "FEMALE",
     avatar: "",
     email: "",
     countryCode: "+91",
@@ -44,8 +44,23 @@ const AddCorporateRegistrationForm: React.FC<
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSectorOpen, setIsSectorOpen] = useState(false);
+  const [sectorSearch, setSectorSearch] = useState("");
+  const sectorDropdownRef = useRef<HTMLDivElement>(null);
 
-  // ... (keeping lines 49-93 unchanged) ...
+  // Close sector dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sectorDropdownRef.current && !sectorDropdownRef.current.contains(event.target as Node)) {
+        setIsSectorOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleInputChange = <K extends keyof CreateCorporateRegistrationDto>(
     field: K,
@@ -71,7 +86,7 @@ const AddCorporateRegistrationForm: React.FC<
     if (!formData.email.trim()) errors.email = "Required";
     if (!formData.mobile.trim()) errors.mobile = "Required";
     if (!formData.companyName.trim()) errors.companyName = "Required";
-    if (!formData.password.trim()) errors.password = "Required";
+    if (!formData.password?.trim()) errors.password = "Required";
     if (!formData.sector) errors.sector = "Required";
     if (!formData.businessLocations.trim()) errors.businessLocations = "Required"; // Validating locations
 
@@ -204,19 +219,19 @@ const AddCorporateRegistrationForm: React.FC<
           <div className="space-y-2">
             <label className={baseLabelClasses}>Gender</label>
             <div className={toggleWrapperClasses}>
-              {["Male", "Female", "Other"].map((g) => (
+              {["MALE", "FEMALE", "OTHER"].map((g) => (
                 <button
                   key={g}
                   type="button"
                   onClick={() =>
                     handleInputChange(
                       "gender",
-                      g as "Male" | "Female" | "Other"
+                      g as "MALE" | "FEMALE" | "OTHER"
                     )
                   }
                   className={`${toggleButtonBase} ${formData.gender === g
-                      ? activeToggleClasses
-                      : inactiveToggleClasses
+                    ? activeToggleClasses
+                    : inactiveToggleClasses
                     }`}
                 >
                   {g}
@@ -332,8 +347,8 @@ const AddCorporateRegistrationForm: React.FC<
                           setSectorSearch("");
                         }}
                         className={`w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-gray-100 dark:hover:bg-white/10 ${formData.sector === opt.value
-                            ? "bg-gray-100 dark:bg-white/10 font-semibold"
-                            : ""
+                          ? "bg-gray-100 dark:bg-white/10 font-semibold"
+                          : ""
                           }`}
                       >
                         {opt.label}
@@ -452,8 +467,8 @@ const AddCorporateRegistrationForm: React.FC<
           <div className="space-y-2 md:col-span-4">
             <label className={baseLabelClasses}>Business Locations <span className="text-red-500">*</span></label>
             <textarea
-              value={formData.notes || ""}
-              onChange={(e) => handleInputChange("notes", e.target.value)}
+              value={formData.businessLocations || ""}
+              onChange={(e) => handleInputChange("businessLocations", e.target.value)}
               placeholder="List key cities / countries where the business operates..."
               className={baseTextAreaClasses}
               required
