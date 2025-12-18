@@ -163,7 +163,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const isPasswordInvalid = touched.password && !!errors.password;
 
   return (
-    <form className="flex flex-col gap-[clamp(24px,1.67vw,32px)]" onSubmit={handleSubmit} noValidate>
+    <form className="flex flex-col gap-[clamp(24px,2.5vw,48px)]" onSubmit={handleSubmit} noValidate>
 
       {generalError && (
         <div className="p-3 bg-red-100 text-red-700 text-sm rounded-lg border border-red-200">
@@ -174,7 +174,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       <div>
         <label
           htmlFor="email"
-          className="block font-sans text-[14px] font-semibold text-brand-text-light-secondary dark:text-white mb-2 leading-none tracking-[0px]"
+          className="block font-sans text-[clamp(14px,0.9vw,18px)] font-semibold text-brand-text-light-secondary dark:text-white mb-2 leading-none tracking-[0px]"
         >
           Email ID
         </label>
@@ -257,7 +257,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         type="submit"
         disabled={isSubmitting}
         style={{ padding: 'clamp(14px,1vw,20px)' }}
-        className="w-full text-white bg-brand-green cursor-pointer hover:bg-brand-green/90 focus:ring-4 focus:outline-none focus:ring-brand-green/30 font-sans font-semibold rounded-full text-[16px] leading-none tracking-[0px] text-center transition-colors duration-300 disabled:bg-brand-green/50 disabled:cursor-not-allowed flex justify-center items-center"
+        className="w-full text-white bg-brand-green cursor-pointer hover:bg-brand-green/90 focus:ring-4 focus:outline-none focus:ring-brand-green/30 font-sans font-semibold rounded-full text-[clamp(16px,1vw,20px)] leading-none tracking-[0px] text-center transition-colors duration-300 disabled:bg-brand-green/50 disabled:cursor-not-allowed flex justify-center items-center"
       >
         {isSubmitting ? (
           <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

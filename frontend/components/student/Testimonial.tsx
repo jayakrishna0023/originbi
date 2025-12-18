@@ -59,61 +59,73 @@ const Testimonial: React.FC = () => {
       <img
         src="/Origin_Fav_Icon.svg"
         alt="Origin BI Icon"
-        className="absolute top-8 left-8 w-8 h-8 md:w-10 md:h-10 z-30 select-none"
+        className="absolute top-8 left-8 w-[clamp(32px,3vw,56px)] h-[clamp(32px,3vw,56px)] z-30 select-none"
       />
       <div className="absolute inset-0 z-0">
         <img
-          key={currentIndex}
-          src={`${current.image}?id=${currentIndex}`}
-          alt={`Testimonial background for ${current.name}`}
-          className="absolute inset-0 w-full h-full object-cover object-top animate-fade-in"
-          loading={currentIndex === 0 ? 'eager' : 'lazy'}
+          src="/Slider.png"
+          alt="Testimonial background"
+          className="absolute inset-0 w-full h-full object-cover object-top select-none pointer-events-none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
       </div>
 
-      <div className="relative z-20 space-y-4 text-white">
-        <div className="space-y-3 md:space-y-4">
-          <QuoteIcon className="w-5 h-5 md:w-6 md:h-6 text-brand-green" />
-          <p className="font-sans text-[clamp(18px,1.67vw,32px)] font-normal leading-[1.2] tracking-[0%]">
+      <div key={currentIndex} className="relative z-20 flex flex-col justify-end h-full">
+        {/* Fill Animation Style */}
+        <style jsx global>{`
+          @keyframes fillProgress {
+            from { width: 0%; }
+            to { width: 100%; }
+          }
+          .animate-fill {
+            animation: fillProgress 5000ms linear forwards;
+          }
+        `}</style>
+
+        <div className="mt-auto space-y-3 md:space-y-4 animate-fade-in">
+          <QuoteIcon className="w-[clamp(20px,2vw,32px)] h-[clamp(20px,2vw,32px)] text-brand-green" />
+
+          <p className="font-sans text-[clamp(16px,1.5vw,28px)] font-normal leading-[1.2] tracking-[0%] text-white">
             {current.quote}
           </p>
-        </div>
-        <div>
-          <p className="font-sans text-[clamp(16px,1.25vw,24px)] font-semibold leading-none tracking-[0%] mb-1">{current.name},</p>
-          <p className="font-sans text-[clamp(14px,1.05vw,20px)] font-normal leading-none tracking-[0%] text-white">{current.title}</p>
+
+          <div className="flex items-end justify-between pt-2">
+            <div>
+              <p className="font-sans text-[clamp(16px,1.25vw,24px)] font-bold leading-none tracking-[0%] mb-1 text-white">{current.name},</p>
+              <p className="font-sans text-[clamp(14px,1.05vw,20px)] font-normal leading-none tracking-[0%] text-white/80">{current.title}</p>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={prevTestimonial}
+                aria-label="Previous testimonial"
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-[clamp(10px,0.8vw,14px)] transition-all transform hover:scale-105"
+              >
+                <ArrowLeftIcon className="w-[clamp(18px,1.2vw,24px)] h-[clamp(18px,1.2vw,24px)]" />
+              </button>
+              <button
+                onClick={nextTestimonial}
+                aria-label="Next testimonial"
+                className="bg-brand-green hover:bg-brand-green/90 text-white rounded-full p-[clamp(10px,0.8vw,14px)] transition-all transform hover:scale-105 shadow-lg shadow-brand-green/30"
+              >
+                <ArrowRightIcon className="w-[clamp(18px,1.2vw,24px)] h-[clamp(18px,1.2vw,24px)]" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {testimonials.map((_, index) => (
-              <div
-                key={index}
-                aria-label={`Go to testimonial ${index + 1}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${index === currentIndex ? 'bg-brand-green w-8' : 'bg-gray-500 w-4'
-                  }`}
-              />
-            ))}
-          </div>
-          <div className="flex space-x-3">
-            <button
-              onClick={prevTestimonial}
-              aria-label="Previous testimonial"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-2 transition-all transform hover:scale-105"
+        <div className="flex items-center w-full gap-2 mt-6">
+          {testimonials.map((_, index) => (
+            <div
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className="h-[3px] rounded-full flex-1 bg-white overflow-hidden cursor-pointer hover:bg-gray-200 transition-colors"
             >
-              <ArrowLeftIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={nextTestimonial}
-              aria-label="Next testimonial"
-              className="bg-brand-green hover:bg-brand-green/90 text-white rounded-full p-2 transition-all transform hover:scale-105 shadow-lg shadow-brand-green/30"
-            >
-              <ArrowRightIcon className="w-5 h-5" />
-            </button>
-          </div>
+              {index === currentIndex && (
+                <div className="h-full bg-brand-green animate-fill" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
