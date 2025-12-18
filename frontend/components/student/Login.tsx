@@ -15,38 +15,44 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const { theme, toggleTheme, isInitialized } = useTheme();
 
   return (
-    <div className="w-full bg-brand-light-primary dark:bg-brand-dark-primary h-[100dvh] grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
+    <div className="w-full max-w-[1920px] mx-auto bg-[#FAFAFA] dark:bg-brand-dark-primary h-[100dvh] grid grid-cols-1 lg:grid-cols-12 gap-[clamp(16px,2vw,40px)] overflow-hidden px-[clamp(24px,8.33vw,160px)] relative">
+      {/* Light Theme Background Pattern Overlay */}
+      <div className="absolute inset-0 bg-[url('/Background_Light_Theme.svg')] bg-cover bg-center bg-no-repeat opacity-100 pointer-events-none dark:hidden z-0" />
+
+      {/* Dark Theme Background Pattern Overlay */}
+      <div className="absolute inset-0 bg-[url('/Background_Dark_Theme.svg')] bg-cover bg-center bg-no-repeat opacity-100 pointer-events-none hidden dark:block z-0" />
+
       {/* Left Column: Grid Layout [Header, Content, Footer] */}
-      <div className="order-1 flex flex-col justify-between gap-[clamp(24px,2.4vw,40px)] p-[clamp(16px,2.5vw,48px)] relative overflow-y-auto lg:overflow-hidden h-full">
+      <div className="order-1 lg:col-span-5 flex flex-col justify-between gap-[clamp(16px,2vw,32px)] py-[clamp(24px,2.5vw,48px)] relative overflow-y-auto lg:overflow-hidden h-full z-10">
         {/* Background Gradients (Subtle) */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-brand-green/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-brand-green/5 rounded-full blur-[100px] pointer-events-none mix-blend-multiply dark:mix-blend-normal" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none mix-blend-multiply dark:mix-blend-normal" />
         {/* Row 1: Header (Aligned with Form) */}
-        <header className="w-full max-w-[clamp(360px,30vw,580px)] self-center flex items-center justify-between z-10 shrink-0 mb-8 lg:mb-0">
-          <div className="w-[clamp(100px,7.3vw,140px)]">
+        <header className="w-full max-w-[clamp(360px,30vw,640px)] self-start flex items-center justify-between z-10 shrink-0 mb-4 lg:mb-0">
+          <div className="w-[clamp(100px,7vw,130px)]">
             <Logo className="w-full h-auto object-contain" />
           </div>
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </header>
 
         {/* Row 2: Main Content (Mobile: Top Adjusted / Desktop: Centered) */}
-        <div className="w-full max-w-[clamp(360px,30vw,580px)] self-center flex flex-col justify-center mt-[clamp(24px,2vw,40px)] lg:mt-0 lg:my-auto">
+        <div className="w-full max-w-[clamp(360px,30vw,640px)] self-start flex flex-col justify-center mt-[clamp(20px,2vw,32px)] lg:mt-0 lg:my-auto">
 
-          <div className="text-left w-full mb-[clamp(24px,2.5vw,48px)]">
-            <h1 className="font-sans font-semibold text-brand-text-light-primary dark:text-brand-text-primary tracking-[0%] leading-none mb-2 text-[clamp(24px,2.5vw,48px)]">
+          <div className="text-left w-full mb-[clamp(16px,2vw,32px)]">
+            <h1 className="font-sans font-semibold text-brand-text-light-primary dark:text-brand-text-primary tracking-[0%] leading-none mb-2 text-[clamp(24px,2.5vw,40px)]">
               Login to your account
             </h1>
-            <p className="font-sans font-normal text-brand-text-light-secondary dark:text-brand-text-white text-[clamp(14px,1.05vw,20px)] leading-none tracking-[0px]">
+            <p className="font-sans text-brand-text-light-secondary dark:text-brand-text-secondary font-normal tracking-[0%] leading-none text-[clamp(13px,1vw,16px)]">
               Discover, connect, and grow with OriginBI
             </p>
             {/* Divider Line */}
-            <div className="w-full h-px bg-brand-light-tertiary dark:bg-white/10 mt-[clamp(24px,2.08vw,40px)]" />
+            <div className="w-full h-px bg-brand-light-tertiary dark:bg-white/10 mt-[clamp(20px,2vw,40px)]" />
           </div>
 
           <LoginForm onLoginSuccess={onLoginSuccess} />
         </div>
 
-        <footer className="w-full max-w-[clamp(360px,30vw,580px)] self-center flex flex-col-reverse sm:flex-row items-center justify-between text-[clamp(12px,0.73vw,14px)] font-medium leading-none tracking-[0px] text-brand-green gap-4 mt-auto lg:mt-0 shrink-0">
+        <footer className="w-full max-w-[clamp(360px,30vw,640px)] self-start flex flex-col-reverse sm:flex-row items-center justify-between text-[clamp(11px,0.8vw,14px)] font-medium leading-none tracking-[0px] text-brand-green gap-4 mt-auto lg:mt-0 shrink-0">
           <div className="flex items-center gap-4">
             <a href="#" className="hover:text-brand-green/80 transition-colors text-right underline decoration-solid decoration-0 underline-offset-2">Privacy Policy</a>
             <span className="border-r border-brand-light-tertiary dark:border-white/20 h-3 hidden sm:block"></span>
@@ -57,7 +63,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       </div>
 
       {/* Right Column: Testimonial/Hero Image */}
-      <div className="order-2 hidden lg:flex h-full p-[clamp(16px,2vw,40px)] items-center justify-center">
+      <div className="order-2 lg:col-span-7 hidden lg:flex h-full p-[clamp(16px,3vw,60px)] items-center justify-center">
         <div className="w-full h-full rounded-[clamp(1.5rem,2.5vw,2.5rem)] overflow-hidden relative shadow-2xl">
           <Testimonial />
         </div>
