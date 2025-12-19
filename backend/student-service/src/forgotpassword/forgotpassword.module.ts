@@ -3,13 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { ForgotPasswordController } from './forgotpassword.controller';
 import { ForgotPasswordService } from './forgotpassword.service';
-import { Student } from '../entities/student.entity';
-import { StudentActionLog } from '../entities/student-action-log.entity';
+import { User } from '../entities/student.entity';
+import { UserActionLog } from '../entities/student-action-log.entity';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Student, StudentActionLog]),
+        TypeOrmModule.forFeature([User, UserActionLog]),
         HttpModule,
         ConfigModule,
     ],

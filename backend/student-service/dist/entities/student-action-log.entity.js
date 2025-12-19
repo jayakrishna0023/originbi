@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StudentActionLog = exports.ActionType = void 0;
+exports.UserActionLog = exports.ActionType = void 0;
 const typeorm_1 = require("typeorm");
 const student_entity_1 = require("./student.entity");
 var ActionType;
@@ -17,22 +17,22 @@ var ActionType;
     ActionType["RESET_PASSWORD"] = "RESET_PASSWORD";
     ActionType["EMAIL_SENT"] = "EMAIL_SENT";
 })(ActionType || (exports.ActionType = ActionType = {}));
-let StudentActionLog = class StudentActionLog {
+let UserActionLog = class UserActionLog {
 };
-exports.StudentActionLog = StudentActionLog;
+exports.UserActionLog = UserActionLog;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
-], StudentActionLog.prototype, "id", void 0);
+], UserActionLog.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => student_entity_1.Student, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'student_id' }),
-    __metadata("design:type", student_entity_1.Student)
-], StudentActionLog.prototype, "student", void 0);
+    (0, typeorm_1.ManyToOne)(() => student_entity_1.User, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'user_id' }),
+    __metadata("design:type", student_entity_1.User)
+], UserActionLog.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'student_id', type: 'integer' }),
+    (0, typeorm_1.Column)({ name: 'user_id', type: 'integer' }),
     __metadata("design:type", Number)
-], StudentActionLog.prototype, "studentId", void 0);
+], UserActionLog.prototype, "userId", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         name: 'action_type',
@@ -40,25 +40,25 @@ __decorate([
         enum: ActionType,
     }),
     __metadata("design:type", String)
-], StudentActionLog.prototype, "actionType", void 0);
+], UserActionLog.prototype, "actionType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'attempt_count', default: 0 }),
     __metadata("design:type", Number)
-], StudentActionLog.prototype, "attemptCount", void 0);
+], UserActionLog.prototype, "attemptCount", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'action_date', type: 'date' }),
     __metadata("design:type", String)
-], StudentActionLog.prototype, "actionDate", void 0);
+], UserActionLog.prototype, "actionDate", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
     __metadata("design:type", Date)
-], StudentActionLog.prototype, "createdAt", void 0);
+], UserActionLog.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({ name: 'updated_at' }),
     __metadata("design:type", Date)
-], StudentActionLog.prototype, "updatedAt", void 0);
-exports.StudentActionLog = StudentActionLog = __decorate([
-    (0, typeorm_1.Entity)('student_action_logs'),
-    (0, typeorm_1.Unique)(['student', 'actionType', 'actionDate'])
-], StudentActionLog);
+], UserActionLog.prototype, "updatedAt", void 0);
+exports.UserActionLog = UserActionLog = __decorate([
+    (0, typeorm_1.Entity)('user_action_logs'),
+    (0, typeorm_1.Unique)(['user', 'actionType', 'actionDate'])
+], UserActionLog);
 //# sourceMappingURL=student-action-log.entity.js.map

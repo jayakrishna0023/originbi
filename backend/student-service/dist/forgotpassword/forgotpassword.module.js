@@ -21,7 +21,7 @@ exports.ForgotPasswordModule = ForgotPasswordModule;
 exports.ForgotPasswordModule = ForgotPasswordModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([student_entity_1.Student, student_action_log_entity_1.StudentActionLog]),
+            typeorm_1.TypeOrmModule.forFeature([student_entity_1.User, student_action_log_entity_1.UserActionLog]),
             axios_1.HttpModule,
             config_1.ConfigModule,
         ],

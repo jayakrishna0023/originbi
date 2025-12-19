@@ -5,4 +5,11 @@ export declare class StudentController {
     getProfile(): Promise<{
         message: string;
     }>;
+    seedStudent(body: {
+        email: string;
+        fullName: string;
+    }): Promise<{
+        message: string;
+        user: import("../entities/student.entity").User;
+    }>;
 }

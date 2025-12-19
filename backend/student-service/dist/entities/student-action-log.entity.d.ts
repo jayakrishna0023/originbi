@@ -1,12 +1,12 @@
-import { Student } from './student.entity';
+import { User } from './student.entity';
 export declare enum ActionType {
     RESET_PASSWORD = "RESET_PASSWORD",
     EMAIL_SENT = "EMAIL_SENT"
 }
-export declare class StudentActionLog {
+export declare class UserActionLog {
     id: string;
-    student: Student;
-    studentId: number;
+    user: User;
+    userId: number;
     actionType: ActionType;
     attemptCount: number;
     actionDate: string;

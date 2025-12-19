@@ -4,18 +4,18 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { Student } from '../entities/student.entity';
-import { StudentActionLog, ActionType } from '../entities/student-action-log.entity';
+import { User } from '../entities/student.entity';
+import { UserActionLog, ActionType } from '../entities/student-action-log.entity';
 
 @Injectable()
 export class ForgotPasswordService {
     private authServiceUrl: string;
 
     constructor(
-        @InjectRepository(Student)
-        private studentRepository: Repository<Student>,
-        @InjectRepository(StudentActionLog)
-        private actionLogRepository: Repository<StudentActionLog>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
+        @InjectRepository(UserActionLog)
+        private actionLogRepository: Repository<UserActionLog>,
         private httpService: HttpService,
         private configService: ConfigService,
     ) {
@@ -25,10 +25,16 @@ export class ForgotPasswordService {
     async initiateStudentReset(email: string) {
         console.log(`[ForgotPasswordService] Initiating reset for: ${email}`);
 
-        // 1. Validate Student
-        const student = await this.studentRepository.findOne({ where: { email } });
-        if (!student) {
-            console.log(`[ForgotPasswordService] Student not found: ${email}`);
+        // 1. Validate User (Case Insensitive) and Role
+        const user = await this.userRepository
+            .createQueryBuilder('user')
+            .select(['user.id', 'user.email', 'user.role'])
+            .where('LOWER(user.email) = LOWER(:email)', { email })
+            .andWhere('LOWER(user.role) = :role', { role: 'student' })
+            .getOne();
+
+        if (!user) {
+            console.log(`[ForgotPasswordService] User not found: ${email}`);
             throw new NotFoundException('User not found.');
         }
 
@@ -38,14 +44,14 @@ export class ForgotPasswordService {
         // Find existing log for today
         const existingLog = await this.actionLogRepository.findOne({
             where: {
-                student: { id: student.id },
+                user: { id: user.id },
                 actionType: ActionType.RESET_PASSWORD,
                 actionDate: today,
             },
         });
 
         if (existingLog && existingLog.attemptCount >= 1) {
-            console.log(`[ForgotPasswordService] Rate limit reached for student: ${student.id}`);
+            console.log(`[ForgotPasswordService] Rate limit reached for user: ${user.id}`);
             throw new BadRequestException('Password reset limit reached. Try again tomorrow.');
         }
 
@@ -57,7 +63,7 @@ export class ForgotPasswordService {
             );
             console.log(`[ForgotPasswordService] Auth Service success`);
         } catch (error: any) {
-            console.error('Auth Service Forgot Password Failed for Student:', error?.response?.data || error.message);
+            console.error('Auth Service Forgot Password Failed for User:', error?.response?.data || error.message);
             // Log full error for debugging
             console.error(error);
             throw new InternalServerErrorException('Failed to initiate password reset. Please try again.');
@@ -70,8 +76,8 @@ export class ForgotPasswordService {
                 await this.actionLogRepository.save(existingLog);
             } else {
                 const newLog = this.actionLogRepository.create({
-                    student: student,
-                    studentId: student.id,
+                    user: user,
+                    userId: user.id,
                     actionType: ActionType.RESET_PASSWORD,
                     actionDate: today,
                     attemptCount: 1,

@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('students')
-export class Student {
+@Entity('users')
+export class User {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
@@ -10,4 +10,7 @@ export class Student {
 
     @Column({ name: 'full_name', nullable: true })
     fullName: string;
+
+    @Column({ default: 'STUDENT' })
+    role: string;
 }

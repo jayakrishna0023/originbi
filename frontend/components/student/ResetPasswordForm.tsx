@@ -82,16 +82,17 @@ const ResetPasswordForm: React.FC = () => {
 
     const iconColorClass = 'text-brand-green';
 
-    // 3️⃣ Password Reset Success Screen
-    if (successMessage) {
-        // Auto-redirect after 5 seconds
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        useEffect(() => {
+    useEffect(() => {
+        if (successMessage) {
             const timer = setTimeout(() => {
                 router.push('/student/login');
             }, 5000);
             return () => clearTimeout(timer);
-        }, []);
+        }
+    }, [successMessage, router]);
+
+    // 3️⃣ Password Reset Success Screen
+    if (successMessage) {
 
         return (
             <div className="w-full max-w-md mx-auto p-10 bg-white dark:bg-[#1E2124] rounded-2xl shadow-xl text-center space-y-8 animate-fade-in flex flex-col items-center">
@@ -123,60 +124,98 @@ const ResetPasswordForm: React.FC = () => {
 
     // 2️⃣ Reset Password Screen
     return (
-        <div className="w-full max-w-md mx-auto p-8 bg-white dark:bg-[#1E2124] rounded-2xl shadow-xl flex flex-col items-center">
-            <Logo className="h-10 w-auto mb-8" />
-
-            <h2 className="text-2xl font-bold text-center mb-2 text-brand-text-primary dark:text-white">
-                Reset Password
-            </h2>
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-8 max-w-[280px]">
-                Enter the code sent to your email and choose a new password.
-            </p>
-
-            <form onSubmit={handleSubmit} className="w-full space-y-5" noValidate>
-                {/* Email Field (ReadOnly for context) */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-brand-text-light-secondary dark:text-gray-400 ml-1">
+        <React.Fragment>
+            <form onSubmit={handleSubmit} className="w-full space-y-4" noValidate>
+                {/* Email Display (Static Text) */}
+                <div className="space-y-1">
+                    <label className="block font-sans text-[clamp(14px,0.9vw,18px)] font-semibold text-brand-text-light-secondary dark:text-white mb-2 leading-none tracking-[0px]">
                         Email Address
                     </label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="bg-gray-50 dark:bg-[#24272B] border border-gray-200 dark:border-white/10 text-brand-text-light-primary dark:text-white text-sm rounded-full block w-full p-4 outline-none focus:ring-1 focus:ring-brand-green opacity-70 cursor-not-allowed"
-                        placeholder="your@email.com"
-                        readOnly
-                    />
+                    <div className="text-base font-semibold text-brand-text-light-primary dark:text-brand-text-secondary px-1 tracking-wide truncate">
+                        {email}
+                    </div>
                 </div>
 
-                {/* OTP Field */}
+                {/* OTP Field - 6 Digit Split Input */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-medium text-brand-text-light-secondary dark:text-gray-400 ml-1">
+                    <label className="block font-sans text-[clamp(14px,0.9vw,18px)] font-semibold text-brand-text-light-secondary dark:text-white mb-2 leading-none tracking-[0px]">
                         Verification Code (OTP)
                     </label>
-                    <input
-                        type="text"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="bg-white dark:bg-[#24272B] border border-gray-200 dark:border-white/10 text-brand-text-light-primary dark:text-white text-sm rounded-full block w-full p-4 outline-none focus:ring-1 focus:ring-brand-green focus:border-brand-green text-center tracking-widest font-bold"
-                        placeholder="------"
-                        required
-                        disabled={isSubmitting}
-                    />
+                    <div className="flex justify-between gap-2 sm:gap-4">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <input
+                                key={index}
+                                id={`otp-${index}`}
+                                type="text"
+                                maxLength={1}
+                                autoFocus={index === 0}
+                                value={otp[index] || ''}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    if (!val && !e.target.value) {
+                                        const newOtp = otp.split('');
+                                        newOtp[index] = '';
+                                        setOtp(newOtp.join(''));
+                                        return;
+                                    }
+                                    if (val) {
+                                        const newOtp = otp.split('');
+                                        newOtp[index] = val;
+                                        setOtp(newOtp.join(''));
+                                        if (index < 5) {
+                                            const nextInput = document.getElementById(`otp-${index + 1}`);
+                                            nextInput?.focus();
+                                        }
+                                    }
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Backspace') {
+                                        if (!otp[index] && index > 0) {
+                                            const prevInput = document.getElementById(`otp-${index - 1}`);
+                                            prevInput?.focus();
+                                        }
+                                        const newOtp = otp.split('');
+                                        newOtp[index] = '';
+                                        setOtp(newOtp.join(''));
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                                    if (pastedData) {
+                                        setOtp(pastedData);
+                                        const focusIndex = Math.min(pastedData.length, 5);
+                                        document.getElementById(`otp-${focusIndex}`)?.focus();
+                                    }
+                                }}
+                                className="w-full aspect-square bg-brand-light-secondary dark:bg-brand-dark-tertiary border border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary text-lg sm:text-xl font-bold rounded-xl text-center outline-none focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-all"
+                                required
+                                disabled={isSubmitting}
+                            />
+                        ))}
+                    </div>
                 </div>
 
                 {/* New Password Field */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-brand-text-light-secondary dark:text-gray-400 ml-1">
+                <div>
+                    <label className="block font-sans text-[clamp(14px,0.9vw,18px)] font-semibold text-brand-text-light-secondary dark:text-white mb-2 leading-none tracking-[0px]">
                         New Password
                     </label>
                     <div className="relative">
                         <input
                             type={passwordVisible ? 'text' : 'password'}
                             value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="bg-white dark:bg-[#24272B] border border-gray-200 dark:border-white/10 text-brand-text-light-primary dark:text-white text-sm rounded-full block w-full p-4 pr-12 outline-none focus:ring-1 focus:ring-brand-green focus:border-brand-green"
-                            placeholder="Min 8 chars, mixed case"
+                            onChange={(e) => {
+                                setNewPassword(e.target.value);
+                                if (error) setError('');
+                            }}
+                            onBlur={() => {
+                                const pwdError = validatePassword(newPassword);
+                                if (pwdError) setError(pwdError);
+                            }}
+                            className="bg-brand-light-secondary dark:bg-brand-dark-tertiary border border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary font-sans text-[clamp(14px,0.83vw,16px)] font-normal leading-none tracking-[0px] rounded-full block w-full pr-12 transition-colors duration-300 focus:ring-brand-green focus:border-brand-green"
+                            style={{ padding: 'clamp(14px,1vw,20px)' }}
+                            placeholder="Min 8 chars, Upper, Lower, Number, Symbol"
                             required
                             disabled={isSubmitting}
                         />
@@ -196,16 +235,25 @@ const ResetPasswordForm: React.FC = () => {
                 </div>
 
                 {/* Confirm Password Field */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-brand-text-light-secondary dark:text-gray-400 ml-1">
+                <div>
+                    <label className="block font-sans text-[clamp(14px,0.9vw,18px)] font-semibold text-brand-text-light-secondary dark:text-white mb-2 leading-none tracking-[0px]">
                         Confirm New Password
                     </label>
                     <div className="relative">
                         <input
                             type={confirmPasswordVisible ? 'text' : 'password'}
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="bg-white dark:bg-[#24272B] border border-gray-200 dark:border-white/10 text-brand-text-light-primary dark:text-white text-sm rounded-full block w-full p-4 pr-12 outline-none focus:ring-1 focus:ring-brand-green focus:border-brand-green"
+                            onChange={(e) => {
+                                setConfirmPassword(e.target.value);
+                                if (error) setError('');
+                            }}
+                            onBlur={() => {
+                                if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+                                    setError('Passwords do not match.');
+                                }
+                            }}
+                            className="bg-brand-light-secondary dark:bg-brand-dark-tertiary border border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary font-sans text-[clamp(14px,0.83vw,16px)] font-normal leading-none tracking-[0px] rounded-full block w-full pr-12 transition-colors duration-300 focus:ring-brand-green focus:border-brand-green"
+                            style={{ padding: 'clamp(14px,1vw,20px)' }}
                             placeholder="Repeat new password"
                             required
                             disabled={isSubmitting}
@@ -227,8 +275,11 @@ const ResetPasswordForm: React.FC = () => {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800 animate-shake">
-                        {error}
+                    <div className="flex items-center gap-2 px-1 animate-fade-in text-red-500 dark:text-red-400 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm font-medium">{error}</span>
                     </div>
                 )}
 
@@ -236,7 +287,8 @@ const ResetPasswordForm: React.FC = () => {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full text-white bg-brand-green hover:bg-brand-green/90 focus:ring-brand-green/30 font-bold rounded-full text-base px-5 py-4 text-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-[0.99] flex justify-center items-center"
+                    style={{ padding: 'clamp(14px,1vw,20px)' }}
+                    className="w-full text-white bg-brand-green cursor-pointer hover:bg-brand-green/90 focus:ring-4 focus:outline-none focus:ring-brand-green/30 font-sans font-semibold rounded-full text-[clamp(16px,1vw,20px)] leading-none tracking-[0px] text-center transition-colors duration-300 disabled:bg-brand-green/50 disabled:cursor-not-allowed flex justify-center items-center mt-2"
                 >
                     {isSubmitting ? (
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -246,16 +298,16 @@ const ResetPasswordForm: React.FC = () => {
                     ) : 'Reset Password'}
                 </button>
 
-                <div className="text-center pt-2">
+                <div className="text-center pt-1">
                     <Link
                         href="/student/login"
-                        className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-brand-green transition-colors"
+                        className="text-sm font-medium text-brand-text-light-secondary dark:text-brand-text-secondary hover:text-brand-green transition-colors"
                     >
                         Back to Login
                     </Link>
                 </div>
             </form>
-        </div>
+        </React.Fragment>
     );
 };
 
