@@ -67,7 +67,6 @@ const Testimonial: React.FC = () => {
           alt="Testimonial background"
           className="absolute inset-0 w-full h-full object-cover object-top select-none pointer-events-none"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
       </div>
 
       <div key={currentIndex} className="relative z-20 flex flex-col justify-end h-full">
@@ -83,7 +82,7 @@ const Testimonial: React.FC = () => {
         `}</style>
 
         <div className="mt-auto space-y-3 md:space-y-4 animate-fade-in">
-          <QuoteIcon className="w-[clamp(20px,2vw,32px)] h-[clamp(20px,2vw,32px)] text-brand-green" />
+          <QuoteIcon className="w-[clamp(16px,1.5vw,24px)] h-[clamp(16px,1.5vw,24px)] text-brand-green" />
 
           <p className="font-sans text-[clamp(16px,1.5vw,28px)] font-normal leading-[1.2] tracking-[0%] text-white">
             {current.quote}
@@ -99,16 +98,16 @@ const Testimonial: React.FC = () => {
               <button
                 onClick={prevTestimonial}
                 aria-label="Previous testimonial"
-                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-[clamp(10px,0.8vw,14px)] transition-all transform hover:scale-105"
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-[clamp(8px,0.6vw,12px)] transition-all transform hover:scale-105"
               >
-                <ArrowLeftIcon className="w-[clamp(18px,1.2vw,24px)] h-[clamp(18px,1.2vw,24px)]" />
+                <ArrowLeftIcon className="w-[clamp(14px,1vw,20px)] h-[clamp(14px,1vw,20px)]" />
               </button>
               <button
                 onClick={nextTestimonial}
                 aria-label="Next testimonial"
-                className="bg-brand-green hover:bg-brand-green/90 text-white rounded-full p-[clamp(10px,0.8vw,14px)] transition-all transform hover:scale-105 shadow-lg shadow-brand-green/30"
+                className="bg-brand-green hover:bg-brand-green/90 text-white rounded-full p-[clamp(8px,0.6vw,12px)] transition-all transform hover:scale-105 shadow-lg shadow-brand-green/30"
               >
-                <ArrowRightIcon className="w-[clamp(18px,1.2vw,24px)] h-[clamp(18px,1.2vw,24px)]" />
+                <ArrowRightIcon className="w-[clamp(14px,1vw,20px)] h-[clamp(14px,1vw,20px)]" />
               </button>
             </div>
           </div>
