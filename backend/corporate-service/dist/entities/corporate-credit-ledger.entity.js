@@ -34,6 +34,10 @@ __decorate([
     __metadata("design:type", Number)
 ], CorporateCreditLedger.prototype, "creditDelta", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'ledger_type', type: 'varchar', length: 10, nullable: true }),
+    __metadata("design:type", String)
+], CorporateCreditLedger.prototype, "ledgerType", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], CorporateCreditLedger.prototype, "reason", void 0);
