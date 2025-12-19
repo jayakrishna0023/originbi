@@ -9,24 +9,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Student = void 0;
+exports.User = void 0;
 const typeorm_1 = require("typeorm");
-let Student = class Student {
+let User = class User {
 };
-exports.Student = Student;
+exports.User = User;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('increment'),
     __metadata("design:type", Number)
-], Student.prototype, "id", void 0);
+], User.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
-], Student.prototype, "email", void 0);
+], User.prototype, "email", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'full_name', nullable: true }),
     __metadata("design:type", String)
-], Student.prototype, "fullName", void 0);
-exports.Student = Student = __decorate([
-    (0, typeorm_1.Entity)('students')
-], Student);
+], User.prototype, "fullName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 'STUDENT' }),
+    __metadata("design:type", String)
+], User.prototype, "role", void 0);
+exports.User = User = __decorate([
+    (0, typeorm_1.Entity)('users')
+], User);
 //# sourceMappingURL=student.entity.js.map

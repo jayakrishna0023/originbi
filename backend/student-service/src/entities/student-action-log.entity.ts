@@ -1,23 +1,23 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Unique } from 'typeorm';
-import { Student } from './student.entity';
+import { User } from './student.entity';
 
 export enum ActionType {
     RESET_PASSWORD = 'RESET_PASSWORD',
     EMAIL_SENT = 'EMAIL_SENT',
 }
 
-@Entity('student_action_logs')
-@Unique(['student', 'actionType', 'actionDate'])
-export class StudentActionLog {
+@Entity('user_action_logs')
+@Unique(['user', 'actionType', 'actionDate'])
+export class UserActionLog {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToOne(() => Student, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'student_id' })
-    student: Student;
+    @ManyToOne(() => User, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'user_id' })
+    user: User;
 
-    @Column({ name: 'student_id', type: 'integer' }) // Student ID is integer
-    studentId: number;
+    @Column({ name: 'user_id', type: 'integer' }) // User ID is integer
+    userId: number;
 
     @Column({
         name: 'action_type',

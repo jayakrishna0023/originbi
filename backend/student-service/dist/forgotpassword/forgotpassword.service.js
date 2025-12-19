@@ -22,8 +22,8 @@ const rxjs_1 = require("rxjs");
 const student_entity_1 = require("../entities/student.entity");
 const student_action_log_entity_1 = require("../entities/student-action-log.entity");
 let ForgotPasswordService = class ForgotPasswordService {
-    constructor(studentRepository, actionLogRepository, httpService, configService) {
-        this.studentRepository = studentRepository;
+    constructor(userRepository, actionLogRepository, httpService, configService) {
+        this.userRepository = userRepository;
         this.actionLogRepository = actionLogRepository;
         this.httpService = httpService;
         this.configService = configService;
@@ -32,21 +32,26 @@ let ForgotPasswordService = class ForgotPasswordService {
     async initiateStudentReset(email) {
         var _a;
         console.log(`[ForgotPasswordService] Initiating reset for: ${email}`);
-        const student = await this.studentRepository.findOne({ where: { email } });
-        if (!student) {
-            console.log(`[ForgotPasswordService] Student not found: ${email}`);
+        const user = await this.userRepository
+            .createQueryBuilder('user')
+            .select(['user.id', 'user.email', 'user.role'])
+            .where('LOWER(user.email) = LOWER(:email)', { email })
+            .andWhere('LOWER(user.role) = :role', { role: 'student' })
+            .getOne();
+        if (!user) {
+            console.log(`[ForgotPasswordService] User not found: ${email}`);
             throw new common_1.NotFoundException('User not found.');
         }
         const today = new Date().toISOString().split('T')[0];
         const existingLog = await this.actionLogRepository.findOne({
             where: {
-                student: { id: student.id },
+                user: { id: user.id },
                 actionType: student_action_log_entity_1.ActionType.RESET_PASSWORD,
                 actionDate: today,
             },
         });
         if (existingLog && existingLog.attemptCount >= 1) {
-            console.log(`[ForgotPasswordService] Rate limit reached for student: ${student.id}`);
+            console.log(`[ForgotPasswordService] Rate limit reached for user: ${user.id}`);
             throw new common_1.BadRequestException('Password reset limit reached. Try again tomorrow.');
         }
         try {
@@ -55,7 +60,7 @@ let ForgotPasswordService = class ForgotPasswordService {
             console.log(`[ForgotPasswordService] Auth Service success`);
         }
         catch (error) {
-            console.error('Auth Service Forgot Password Failed for Student:', ((_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
+            console.error('Auth Service Forgot Password Failed for User:', ((_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
             console.error(error);
             throw new common_1.InternalServerErrorException('Failed to initiate password reset. Please try again.');
         }
@@ -66,8 +71,8 @@ let ForgotPasswordService = class ForgotPasswordService {
             }
             else {
                 const newLog = this.actionLogRepository.create({
-                    student: student,
-                    studentId: student.id,
+                    user: user,
+                    userId: user.id,
                     actionType: student_action_log_entity_1.ActionType.RESET_PASSWORD,
                     actionDate: today,
                     attemptCount: 1,
@@ -84,8 +89,8 @@ let ForgotPasswordService = class ForgotPasswordService {
 exports.ForgotPasswordService = ForgotPasswordService;
 exports.ForgotPasswordService = ForgotPasswordService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(student_entity_1.Student)),
-    __param(1, (0, typeorm_1.InjectRepository)(student_action_log_entity_1.StudentActionLog)),
+    __param(0, (0, typeorm_1.InjectRepository)(student_entity_1.User)),
+    __param(1, (0, typeorm_1.InjectRepository)(student_action_log_entity_1.UserActionLog)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         axios_1.HttpService,

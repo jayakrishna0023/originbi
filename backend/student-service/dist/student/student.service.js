@@ -18,17 +18,26 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const student_entity_1 = require("../entities/student.entity");
 let StudentService = class StudentService {
-    constructor(studentRepo) {
-        this.studentRepo = studentRepo;
+    constructor(userRepo) {
+        this.userRepo = userRepo;
     }
     async getProfile() {
         return { message: 'Hello Student!' };
+    }
+    async createTestStudent(email, fullName) {
+        let user = await this.userRepo.findOne({ where: { email } });
+        if (!user) {
+            user = this.userRepo.create({ email, fullName });
+            await this.userRepo.save(user);
+            return { message: 'Test user created successfully', user };
+        }
+        return { message: 'User already exists', user };
     }
 };
 exports.StudentService = StudentService;
 exports.StudentService = StudentService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(student_entity_1.Student)),
+    __param(0, (0, typeorm_1.InjectRepository)(student_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository])
 ], StudentService);
 //# sourceMappingURL=student.service.js.map

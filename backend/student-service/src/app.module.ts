@@ -21,7 +21,7 @@ import { ForgotPasswordModule } from './forgotpassword/forgotpassword.module';
                 password: config.get<string>('DB_PASS'),
                 database: config.get<string>('DB_NAME'),
                 autoLoadEntities: true,
-                synchronize: true, // Temporary dev mode
+                synchronize: false, // Disabled to prevent altering existing 'users' table
             }),
         }),
         StudentModule,

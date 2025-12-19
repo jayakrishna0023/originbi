@@ -167,8 +167,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
     <form className="flex flex-col gap-[clamp(24px,2.5vw,48px)]" onSubmit={handleSubmit} noValidate>
 
       {generalError && (
-        <div className="p-3 bg-red-100 text-red-700 text-sm rounded-lg border border-red-200">
-          {generalError}
+        <div className="flex items-center gap-2 px-1 animate-fade-in text-red-500 dark:text-red-400">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          <span className="text-sm font-medium">{generalError}</span>
         </div>
       )}
 
@@ -186,18 +189,24 @@ const LoginForm: React.FC<LoginFormProps> = ({
           value={values.email}
           onChange={handleChange}
           onBlur={handleBlur}
+          autoFocus
           className={`bg-brand-light-secondary dark:bg-brand-dark-tertiary border text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary font-sans text-[clamp(14px,0.83vw,16px)] font-normal leading-none tracking-[0px] rounded-full block w-full transition-colors duration-300 ${isEmailInvalid
             ? "border-red-500 focus:ring-red-500 focus:border-red-500"
             : "border-brand-light-tertiary dark:border-brand-dark-tertiary focus:ring-brand-green focus:border-brand-green"
             }`}
           style={{ padding: 'clamp(14px,1vw,20px)' }}
-          placeholder="Example@gmail.com"
+          placeholder="example@domain.com"
           required
           disabled={isSubmitting}
           aria-invalid={isEmailInvalid}
         />
         {isEmailInvalid && (
-          <p className="mt-2 text-sm text-red-500">{errors.email}</p>
+          <div className="flex items-center gap-2 px-1 animate-fade-in text-red-500 dark:text-red-400 mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm font-medium">{errors.email}</span>
+          </div>
         )}
       </div>
 
@@ -240,7 +249,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
           </button>
         </div>
         {isPasswordInvalid && (
-          <p className="mt-2 text-sm text-red-500">{errors.password}</p>
+          <div className="flex items-center gap-2 px-1 animate-fade-in text-red-500 dark:text-red-400 mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm font-medium">{errors.password}</span>
+          </div>
         )}
 
         {/* Forgot Password - Inside Block for tighter grouping */}

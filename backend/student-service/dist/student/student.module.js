@@ -19,7 +19,7 @@ exports.StudentModule = StudentModule;
 exports.StudentModule = StudentModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([student_entity_1.Student]),
+            typeorm_1.TypeOrmModule.forFeature([student_entity_1.User]),
             axios_1.HttpModule,
         ],
         controllers: [student_controller_1.StudentController],
