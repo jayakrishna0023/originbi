@@ -5,6 +5,7 @@ export declare class CorporateCreditLedger {
     corporateAccountId: number;
     corporateAccount: CorporateAccount;
     creditDelta: number;
+    ledgerType: string;
     reason?: string;
     createdByUserId?: number;
     createdByUser?: User;
