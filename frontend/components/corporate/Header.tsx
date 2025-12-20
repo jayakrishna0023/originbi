@@ -54,19 +54,17 @@ const NavItem: React.FC<NavItemProps> = ({
     <div className="relative group">
       <button
         onClick={onClick}
-        className={`flex items-center ${spacingClass} rounded-lg transition-colors duration-200 w-full ${
-          active
+        className={`flex items-center ${spacingClass} rounded-lg transition-colors duration-200 w-full ${active
             ? "bg-brand-green text-white px-3 py-2"
             : "text-brand-text-light-secondary dark:text-brand-text-secondary hover:bg-brand-light-tertiary dark:hover:bg-brand-dark-tertiary hover:text-brand-text-light-primary dark:hover:text-white p-2 lg:px-3"
-        }`}
+          }`}
       >
         <div className={`${active ? "text-white" : "text-current"}`}>
           {icon}
         </div>
         <span
-          className={`font-medium text-sm whitespace-nowrap ${
-            isMobile ? "inline" : showDesktopText
-          }`}
+          className={`font-medium text-sm whitespace-nowrap ${isMobile ? "inline" : showDesktopText
+            }`}
         >
           {label}
         </span>
@@ -127,6 +125,22 @@ const Header: React.FC<HeaderProps> = ({
   const langMenuRef = useRef<HTMLDivElement>(null);
   const notificationsMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const [corporateData, setCorporateData] = useState<any>(null);
+
+  useEffect(() => {
+    if (portalMode === 'corporate') {
+      // Dynamic import to avoid cycles or issues if service not available in all contexts
+      import('@/lib/services').then(({ corporateDashboardService }) => {
+        const email = sessionStorage.getItem('userEmail');
+        if (email) {
+          corporateDashboardService.getProfile(email)
+            .then(setCorporateData)
+            .catch((err) => console.error("Failed to fetch header data", err));
+        }
+      });
+    }
+  }, [portalMode]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -383,7 +397,7 @@ const Header: React.FC<HeaderProps> = ({
                 >
                   <CoinIcon className="w-5 h-5" />
                   <span className="font-bold text-sm text-brand-text-light-primary dark:text-white">
-                    250
+                    {corporateData?.available_credits ?? 250}
                   </span>
                 </div>
               )}
@@ -399,22 +413,21 @@ const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 sm:space-x-3 focus:outline-none"
           >
             <img
-              src="https://i.pravatar.cc/40?u=monishwar"
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(corporateData?.full_name || 'User')}&background=random`}
               alt="User Avatar"
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-brand-light-tertiary dark:border-transparent"
             />
             <div className="text-left hidden xl:block">
               <p className="font-semibold text-base leading-tight text-brand-text-light-primary dark:text-brand-text-primary">
-                Monishwar Rajasekaran
+                {corporateData?.full_name || (portalMode === 'corporate' ? 'Corporate User' : 'Monishwar Rajasekaran')}
               </p>
               <p className="text-sm text-brand-text-light-secondary dark:text-brand-text-secondary leading-tight">
-                MonishwarRaja@originbi.com
+                {corporateData?.email || (portalMode === 'corporate' ? '' : 'MonishwarRaja@originbi.com')}
               </p>
             </div>
             <ChevronDownIcon
-              className={`w-4 h-4 sm:w-5 sm:h-5 text-brand-text-light-secondary dark:text-brand-text-secondary transition-transform hidden sm:block ${
-                isProfileOpen ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 sm:w-5 sm:h-5 text-brand-text-light-secondary dark:text-brand-text-secondary transition-transform hidden sm:block ${isProfileOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -428,8 +441,8 @@ const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full flex items-center px-3 py-2 text-sm font-medium text-brand-text-light-primary dark:text-white rounded-lg hover:bg-brand-light-tertiary dark:hover:bg-brand-dark-tertiary transition-colors"
                 >
-                  <SettingsIcon className="w-5 h-5 mr-3" />
-                  <span>Switch Portal</span>
+                  {portalMode === 'corporate' ? <ProfileIcon className="w-5 h-5 mr-3" /> : <SettingsIcon className="w-5 h-5 mr-3" />}
+                  <span>{portalMode === 'corporate' ? 'View Profile' : 'Switch Portal'}</span>
                 </button>
 
                 <button
