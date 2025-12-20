@@ -6,11 +6,14 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { User } from '../entities/user.entity';
 import { CorporateAccount } from '../entities/corporate-account.entity';
+import { CorporateCreditLedger } from '../entities/corporate-credit-ledger.entity';
 import { UserActionLog, ActionType, UserRole } from '../entities/user-action-log.entity';
 
 @Injectable()
 export class CorporateDashboardService {
     private authServiceUrl: string;
+    private razorpay: any;
+    private perCreditCost: number;
 
     constructor(
         @InjectRepository(User)
@@ -19,10 +22,19 @@ export class CorporateDashboardService {
         private readonly corporateRepo: Repository<CorporateAccount>,
         @InjectRepository(UserActionLog)
         private actionLogRepository: Repository<UserActionLog>,
+        @InjectRepository(CorporateCreditLedger)
+        private readonly ledgerRepo: Repository<CorporateCreditLedger>,
         private httpService: HttpService,
         private configService: ConfigService,
     ) {
         this.authServiceUrl = this.configService.get<string>('AUTH_SERVICE_URL') || 'http://localhost:4002';
+        this.perCreditCost = parseFloat(this.configService.get<string>('PER_CREDIT_COST') || '200');
+
+        const Razorpay = require('razorpay');
+        this.razorpay = new Razorpay({
+            key_id: this.configService.get<string>('RAZORPAY_KEY_ID'),
+            key_secret: this.configService.get<string>('RAZORPAY_KEY_SECRET'),
+        });
     }
 
     async getStats(email: string) {
@@ -112,5 +124,365 @@ export class CorporateDashboardService {
         }
 
         return { success: true, message: 'Password reset initiated. Check your email.' };
+    }
+    async getProfile(email: string) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const corporate = await this.corporateRepo.findOne({
+            where: { userId: user.id },
+            relations: ['user'], // Load user relation if needed, though we have 'user' already
+        });
+
+        if (!corporate) {
+            throw new NotFoundException('Corporate account not found');
+        }
+
+        return {
+            ...corporate,
+            // Map snake_case to what frontend expects if needed, or just return entity
+            // The frontend CorporateDetailsView expects fields like full_name, etc.
+            // My entity uses camelCase properties mapped to snake_case columns.
+            // I should return an object that matches the frontend interface ExtendedCorporateAccount
+            // Frontend keys: full_name, email, job_title, etc.
+            // Entity keys: fullName, email (from user), jobTitle...
+            id: corporate.id,
+            company_name: corporate.companyName,
+            sector_code: corporate.sectorCode,
+            employee_ref_id: corporate.employeeRefId,
+            job_title: corporate.jobTitle,
+            gender: corporate.gender,
+            email: user.email,
+            country_code: corporate.countryCode,
+            mobile_number: corporate.mobileNumber,
+            linkedin_url: corporate.linkedinUrl,
+            business_locations: corporate.businessLocations,
+            available_credits: corporate.availableCredits,
+            total_credits: corporate.totalCredits,
+            is_active: corporate.isActive,
+            is_blocked: user.isBlocked,
+            full_name: corporate.fullName,
+            created_at: corporate.createdAt,
+            updated_at: corporate.updatedAt,
+            per_credit_cost: this.perCreditCost,
+        };
+    }
+
+    async createOrder(email: string, creditCount: number, reason: string) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user) throw new NotFoundException('User not found');
+
+        const corporate = await this.corporateRepo.findOne({ where: { userId: user.id } });
+        if (!corporate) throw new NotFoundException('Corporate account not found');
+
+        if (creditCount <= 0) throw new BadRequestException('Invalid credit count');
+
+        const totalAmount = creditCount * this.perCreditCost;
+        const options = {
+            amount: totalAmount * 100, // amount in paisa
+            currency: 'INR',
+            receipt: `receipt_${Date.now()}`,
+            notes: {
+                creditCount: creditCount,
+                userId: corporate.userId, // Use corporate user ID
+                corporateAccountId: corporate.id,
+                perCreditCost: this.perCreditCost,
+                reason: reason || 'Credit Top-up',
+            }
+        };
+
+        try {
+            const order = await this.razorpay.orders.create(options);
+            // NOTE: We do NOT create a ledger entry here anymore. 
+            // It will be created on success or failure confirmation.
+
+            return {
+                orderId: order.id,
+                amount: totalAmount * 100,
+                currency: 'INR',
+                key: this.configService.get<string>('RAZORPAY_KEY_ID'),
+                perCreditCost: this.perCreditCost,
+            };
+        } catch (error) {
+            console.error('Razorpay Error:', error);
+            throw new InternalServerErrorException('Failed to create payment order');
+        }
+    }
+
+    async verifyPayment(email: string, paymentDetails: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+    }) {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = paymentDetails;
+
+        // 1. Verify Signature
+        const crypto = require('crypto');
+        const hmac = crypto.createHmac('sha256', this.configService.get<string>('RAZORPAY_KEY_SECRET'));
+        hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
+        const generated_signature = hmac.digest('hex');
+
+        if (generated_signature !== razorpay_signature) {
+            throw new BadRequestException('Payment verification failed');
+        }
+
+        // 2. Fetch Order Details from Razorpay to get Metadata (Notes)
+        let order;
+        try {
+            order = await this.razorpay.orders.fetch(razorpay_order_id);
+        } catch (e) {
+            throw new InternalServerErrorException('Failed to fetch order details from Razorpay');
+        }
+
+        const notes = order.notes;
+        const creditDelta = Number(notes.creditCount);
+        const corporateAccountId = Number(notes.corporateAccountId);
+        const createdByUserId = Number(notes.userId); // This is the corporate user id
+        const perCreditCost = Number(notes.perCreditCost);
+        const totalAmount = creditDelta * perCreditCost;
+        const reason = notes.reason || 'Credit Top-up';
+
+        // 3. Transactional Update
+        const queryRunner = this.ledgerRepo.manager.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            // Check if transaction already recorded
+            const existingLedger = await queryRunner.manager.findOne(CorporateCreditLedger, {
+                where: { razorpayOrderId: razorpay_order_id },
+            });
+
+            if (existingLedger) {
+                return { success: true, message: 'Already processed' };
+            }
+
+            // Create Ledger Entry
+            const ledgerEntry = this.ledgerRepo.create({
+                corporateAccountId: corporateAccountId,
+                creditDelta: creditDelta,
+                ledgerType: 'CREDIT',
+                reason: reason,
+                createdByUserId: createdByUserId,
+                perCreditCost: perCreditCost,
+                totalAmount: totalAmount,
+                paymentStatus: 'SUCCESS',
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id,
+                paidOn: new Date(),
+            });
+
+            await queryRunner.manager.save(ledgerEntry);
+
+            // Update Corporate Credits
+            const corporate = await queryRunner.manager.findOne(CorporateAccount, {
+                where: { id: corporateAccountId },
+            });
+
+            if (corporate) {
+                corporate.availableCredits += creditDelta;
+                corporate.totalCredits += creditDelta;
+                await queryRunner.manager.save(corporate);
+            }
+
+            await queryRunner.commitTransaction();
+
+            // --- Send Success Email ---
+            try {
+                // Fetch user email details 
+                // We can use the 'email' arg passed to this function as it comes from the auth context/session usually
+                // Or fetch from DB using createdByUserId
+                const user = await this.userRepo.findOne({ where: { id: createdByUserId } });
+                const emailToSend = user ? user.email : email;
+
+                await this.sendPaymentSuccessEmail(emailToSend, {
+                    paymentId: razorpay_payment_id,
+                    amount: totalAmount.toFixed(2),
+                    credits: creditDelta,
+                    date: new Date().toLocaleDateString(),
+                    dashboardUrl: this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000',
+                });
+            } catch (emailErr) {
+                console.error("Failed to send payment success email:", emailErr);
+            }
+
+            return { success: true };
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    async recordPaymentFailure(razorpayOrderId: string, errorDescription: string) {
+        // Fetch Order to get details
+        let order;
+        try {
+            order = await this.razorpay.orders.fetch(razorpayOrderId);
+        } catch (e) {
+            console.error("Failed to fetch order for failure recording", e);
+            return; // Can't record if we don't know who it is
+        }
+
+        const notes = order.notes;
+        const existing = await this.ledgerRepo.findOne({ where: { razorpayOrderId: razorpayOrderId } });
+        if (existing) return; // Already recorded
+
+        const ledgerEntry = this.ledgerRepo.create({
+            corporateAccountId: Number(notes.corporateAccountId),
+            creditDelta: Number(notes.creditCount),
+            ledgerType: 'CREDIT',
+            reason: `Payment Failed: ${errorDescription}`,
+            createdByUserId: Number(notes.userId),
+            perCreditCost: Number(notes.perCreditCost),
+            totalAmount: Number(notes.creditCount) * Number(notes.perCreditCost),
+            paymentStatus: 'FAILED',
+            razorpayOrderId: razorpayOrderId,
+        });
+
+        await this.ledgerRepo.save(ledgerEntry);
+        return { success: true };
+    }
+
+    private async sendPaymentSuccessEmail(toAddress: string, data: any) {
+        const { SESClient, SendEmailCommand } = require("@aws-sdk/client-ses");
+        const fs = require('fs');
+        const path = require('path');
+
+        const sesClient = new SESClient({
+            region: this.configService.get<string>('AWS_REGION'),
+            credentials: {
+                accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+                secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
+            },
+        });
+
+        const templatePath = path.join(__dirname, '..', 'mail', 'payment-success.html');
+        let htmlContent = fs.readFileSync(templatePath, 'utf8');
+
+        // Replace placeholders
+        htmlContent = htmlContent.replace('{{paymentId}}', data.paymentId);
+        htmlContent = htmlContent.replace('{{amount}}', data.amount);
+        htmlContent = htmlContent.replace('{{credits}}', data.credits);
+        htmlContent = htmlContent.replace('{{date}}', data.date);
+        htmlContent = htmlContent.replace('{{dashboardUrl}}', `${data.dashboardUrl}/corporate/dashboard`);
+        htmlContent = htmlContent.replace('{{year}}', new Date().getFullYear().toString());
+
+        const params = {
+            Source: this.configService.get<string>('EMAIL_FROM'),
+            Destination: {
+                ToAddresses: [toAddress],
+                CcAddresses: [this.configService.get<string>('EMAIL_CC')],
+            },
+            Message: {
+                Subject: {
+                    Data: "Payment Successful - Credits Added",
+                    Charset: "UTF-8",
+                },
+                Body: {
+                    Html: {
+                        Data: htmlContent,
+                        Charset: "UTF-8",
+                    },
+                },
+            },
+        };
+
+        const command = new SendEmailCommand(params);
+        await sesClient.send(command);
+    }
+
+    async getLedger(email: string, page: number = 1, limit: number = 10, search?: string) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user) throw new NotFoundException('User not found');
+
+        const corporate = await this.corporateRepo.findOne({ where: { userId: user.id } });
+        if (!corporate) throw new NotFoundException('Corporate account not found');
+
+        const { ILike, Raw } = require('typeorm');
+        let whereCondition: any = { corporateAccountId: corporate.id };
+
+        if (search) {
+            whereCondition = [
+                { corporateAccountId: corporate.id, reason: ILike(`%${search}%`) },
+                { corporateAccountId: corporate.id, ledgerType: ILike(`%${search}%`) },
+                { corporateAccountId: corporate.id, paymentStatus: ILike(`%${search}%`) },
+                { corporateAccountId: corporate.id, razorpayPaymentId: ILike(`%${search}%`) },
+                // Date searching
+                {
+                    corporateAccountId: corporate.id,
+                    createdAt: Raw(alias => `TO_CHAR(${alias}, 'MM/DD/YYYY') ILIKE '%${search}%'`)
+                },
+                {
+                    corporateAccountId: corporate.id,
+                    paidOn: Raw(alias => `TO_CHAR(${alias}, 'MM/DD/YYYY') ILIKE '%${search}%'`)
+                }
+            ];
+        }
+
+        const [items, total] = await this.ledgerRepo.findAndCount({
+            where: whereCondition,
+            order: { createdAt: 'DESC' },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        // Map items to snake_case for frontend
+        const mappedItems = items.map(item => ({
+            id: item.id,
+            corporate_account_id: item.corporateAccountId,
+            credit_delta: item.creditDelta,
+            ledger_type: item.ledgerType,
+            reason: item.reason,
+            created_by_user_id: item.createdByUserId,
+            created_at: item.createdAt,
+            // Add new payment fields
+            per_credit_cost: item.perCreditCost,
+            total_amount: item.totalAmount,
+            payment_status: item.paymentStatus,
+            paid_on: item.paidOn,
+        }));
+
+        return {
+            data: mappedItems,
+            total,
+            page,
+            limit,
+        };
+    }
+
+    async topUpCredits(email: string, amount: number, reason: string) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user) throw new NotFoundException('User not found');
+
+        const corporate = await this.corporateRepo.findOne({ where: { userId: user.id } });
+        if (!corporate) throw new NotFoundException('Corporate account not found');
+
+        // Update corporate credits
+        corporate.availableCredits += amount;
+        corporate.totalCredits += amount;
+        await this.corporateRepo.save(corporate);
+
+        // Add ledger entry
+        const ledger = this.ledgerRepo.create({
+            corporateAccountId: corporate.id,
+            creditDelta: amount,  // Positive for top up
+            ledgerType: 'CREDIT',
+            reason: reason || 'Top-up',
+            createdByUserId: corporate.userId,
+            // Admin top-up usually has no payment cost associated in this flow, or 0
+            paymentStatus: 'NA', // Not Applicable
+            totalAmount: 0,
+        });
+        await this.ledgerRepo.save(ledger);
+
+        return {
+            success: true,
+            newAvailable: corporate.availableCredits,
+            newTotal: corporate.totalCredits,
+        };
     }
 }

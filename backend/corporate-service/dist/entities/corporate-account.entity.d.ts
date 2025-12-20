@@ -10,4 +10,14 @@ export declare class CorporateAccount {
     employeeRefId?: string;
     isActive: boolean;
     creditLedgers: CorporateCreditLedger[];
+    fullName?: string;
+    sectorCode?: string;
+    jobTitle?: string;
+    gender?: string;
+    countryCode?: string;
+    mobileNumber?: string;
+    linkedinUrl?: string;
+    businessLocations?: string;
+    createdAt: Date;
+    updatedAt: Date;
 }

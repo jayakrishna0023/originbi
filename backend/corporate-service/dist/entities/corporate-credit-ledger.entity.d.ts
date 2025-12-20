@@ -10,4 +10,10 @@ export declare class CorporateCreditLedger {
     createdByUserId?: number;
     createdByUser?: User;
     createdAt: Date;
+    perCreditCost?: number;
+    totalAmount?: number;
+    paymentStatus?: string;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+    paidOn?: Date;
 }

@@ -54,6 +54,30 @@ __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
     __metadata("design:type", Date)
 ], CorporateCreditLedger.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'per_credit_cost', type: 'decimal', precision: 10, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], CorporateCreditLedger.prototype, "perCreditCost", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'total_amount', type: 'decimal', precision: 10, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], CorporateCreditLedger.prototype, "totalAmount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'payment_status', type: 'varchar', length: 20, nullable: true, default: 'NA' }),
+    __metadata("design:type", String)
+], CorporateCreditLedger.prototype, "paymentStatus", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'razorpay_order_id', nullable: true }),
+    __metadata("design:type", String)
+], CorporateCreditLedger.prototype, "razorpayOrderId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'razorpay_payment_id', nullable: true }),
+    __metadata("design:type", String)
+], CorporateCreditLedger.prototype, "razorpayPaymentId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'paid_on', type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], CorporateCreditLedger.prototype, "paidOn", void 0);
 exports.CorporateCreditLedger = CorporateCreditLedger = __decorate([
     (0, typeorm_1.Entity)('corporate_credit_ledger')
 ], CorporateCreditLedger);
