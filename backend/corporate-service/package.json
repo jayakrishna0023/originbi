@@ -22,6 +22,7 @@
     "dependencies": {
         "@aws-sdk/client-ses": "^3.956.0",
         "@nestjs/axios": "^4.0.1",
+        "@nestjs/cli": "^11.0.0",
         "@nestjs/common": "^11.0.1",
         "@nestjs/config": "^4.0.2",
         "@nestjs/core": "^11.0.1",
@@ -39,8 +40,7 @@
         "razorpay": "^2.9.6",
         "reflect-metadata": "^0.2.2",
         "rxjs": "^7.8.1",
-        "typeorm": "^0.3.28",
-        "@nestjs/cli": "^11.0.0"
+        "typeorm": "^0.3.28"
     },
     "devDependencies": {
         "@nestjs/schematics": "^11.0.0",
