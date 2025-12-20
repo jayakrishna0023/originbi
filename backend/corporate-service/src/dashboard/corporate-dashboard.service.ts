@@ -354,7 +354,7 @@ export class CorporateDashboardService {
             },
         });
 
-        const templatePath = path.join(__dirname, '..', 'mail', 'payment-success.html');
+        const templatePath = path.join(__dirname, '..', 'mail', 'templates', '');
         let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
         htmlContent = htmlContent.replace('{{paymentId}}', data.paymentId);
