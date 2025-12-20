@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 import Logo from "@/components/ui/Logo";
 import RegistrationForm from "@/components/corporate/RegistrationForm";

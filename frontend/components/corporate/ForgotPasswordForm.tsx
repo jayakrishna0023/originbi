@@ -4,12 +4,6 @@ import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 
-'use client';
-
-import React, { useState, FormEvent } from 'react';
-import Link from 'next/link';
-import Logo from '@/components/ui/Logo';
-
 const ForgotPasswordForm: React.FC = () => {
     const [email, setEmail] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,7 +140,5 @@ const ForgotPasswordForm: React.FC = () => {
         </form>
     );
 };
-
-export default ForgotPasswordForm;
 
 export default ForgotPasswordForm;
