@@ -53,6 +53,46 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => corporate_credit_ledger_entity_1.CorporateCreditLedger, (ledger) => ledger.corporateAccount),
     __metadata("design:type", Array)
 ], CorporateAccount.prototype, "creditLedgers", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'full_name', length: 200, nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "fullName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'sector_code', length: 50, nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "sectorCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'job_title', length: 100, nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "jobTitle", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'gender', length: 20, nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "gender", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'country_code', length: 10, nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "countryCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'mobile_number', length: 20, nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "mobileNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'linkedin_url', nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "linkedinUrl", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'business_locations', nullable: true }),
+    __metadata("design:type", String)
+], CorporateAccount.prototype, "businessLocations", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
+    __metadata("design:type", Date)
+], CorporateAccount.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ name: 'updated_at' }),
+    __metadata("design:type", Date)
+], CorporateAccount.prototype, "updatedAt", void 0);
 exports.CorporateAccount = CorporateAccount = __decorate([
     (0, typeorm_1.Entity)('corporate_accounts')
 ], CorporateAccount);

@@ -4,7 +4,8 @@ import { reportService } from "@/lib/services/report.service";
 import { corporateRegistrationService } from "@/lib/services/corporateRegistration.service";
 import { programService } from "@/lib/services/program.service";
 import { registrationService } from "@/lib/services/registration.service";
-export type { ApiError, PaginatedResponse } from "./types"; // Adjust if types are here
+import { corporateDashboardService } from "@/lib/services/corporateDashboard.service";
+export type { ApiError, PaginatedResponse } from "./types";
 
 export {
   AuthService,
@@ -12,5 +13,6 @@ export {
   reportService,
   corporateRegistrationService,
   programService,
-  registrationService
+  registrationService,
+  corporateDashboardService
 };

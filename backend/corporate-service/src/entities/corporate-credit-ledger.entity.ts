@@ -39,4 +39,22 @@ export class CorporateCreditLedger {
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
+
+    @Column({ name: 'per_credit_cost', type: 'decimal', precision: 10, scale: 2, nullable: true })
+    perCreditCost?: number;
+
+    @Column({ name: 'total_amount', type: 'decimal', precision: 10, scale: 2, nullable: true })
+    totalAmount?: number;
+
+    @Column({ name: 'payment_status', type: 'varchar', length: 20, nullable: true, default: 'NA' })
+    paymentStatus?: string;
+
+    @Column({ name: 'razorpay_order_id', nullable: true })
+    razorpayOrderId?: string;
+
+    @Column({ name: 'razorpay_payment_id', nullable: true })
+    razorpayPaymentId?: string;
+
+    @Column({ name: 'paid_on', type: 'timestamp', nullable: true })
+    paidOn?: Date;
 }

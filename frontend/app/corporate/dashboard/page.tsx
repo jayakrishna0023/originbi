@@ -37,6 +37,7 @@ export default function CorporateDashboardPage() {
         currentView="dashboard"
         portalMode="corporate"
         onNavigate={handleNavigate}
+        onSwitchPortal={() => router.push('/corporate/profile')}
       />
 
       <main className="p-6">

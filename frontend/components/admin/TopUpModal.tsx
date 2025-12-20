@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
+import Script from 'next/script';
 
 interface TopUpModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (amount: number, reason: string) => void;
     loading: boolean;
+    mode?: 'admin' | 'payment';
+    perCreditCost?: number;
 }
 
-const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, onSubmit, loading }) => {
+const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, onSubmit, loading, mode = 'admin', perCreditCost = 200 }) => {
     const [amount, setAmount] = useState<string>('');
-    const [reason, setReason] = useState('Top-up by Admin');
+    const [reason, setReason] = useState(mode === 'admin' ? 'Top-up by Admin' : 'Credit Purchase');
     const [remarks, setRemarks] = useState('');
 
     if (!isOpen) return null;
@@ -19,17 +22,28 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, onSubmit, load
         const val = parseInt(amount, 10);
         if (val && !isNaN(val)) {
             // Pass remarks as the reason if provided, else default
-            onSubmit(val, remarks || 'Top-up by Admin');
-            setAmount('');
-            setReason('');
-            setRemarks('');
+            const finalReason = remarks || (mode === 'admin' ? 'Top-up by Admin' : 'Credit Purchase');
+            onSubmit(val, finalReason);
+            // Don't clear immediately if loading, let parent handle close
+            if (mode === 'admin') {
+                setAmount('');
+                setReason('');
+                setRemarks('');
+            }
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <Script
+                id="razorpay-checkout-js"
+                src="https://checkout.razorpay.com/v1/checkout.js"
+                strategy="lazyOnload"
+            />
             <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-800">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Top-up Credit</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    {mode === 'payment' ? 'Purchase Credits' : 'Top-up Credit'}
+                </h3>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -45,6 +59,18 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, onSubmit, load
                             required
                             min="1"
                         />
+                        {mode === 'payment' && (
+                            <div className="flex justify-between items-center mt-1">
+                                <p className="text-xs text-gray-500">
+                                    Per Credit Cost: <span className="font-bold">₹{perCreditCost}</span>
+                                </p>
+                                {amount && (
+                                    <p className="text-xs text-gray-500">
+                                        Total Cost: <span className="font-bold">₹{parseInt(amount) * perCreditCost}</span>
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div>
@@ -73,7 +99,7 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, onSubmit, load
                             disabled={loading || !amount}
                             className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
-                            {loading ? 'Processing...' : 'Submit'}
+                            {loading ? 'Processing...' : (mode === 'payment' ? 'Pay Now' : 'Submit')}
                         </button>
                     </div>
                 </form>

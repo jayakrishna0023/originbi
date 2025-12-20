@@ -28,6 +28,7 @@ export default function RegistrationsPage() {
         currentView="registrations"
         portalMode="corporate"
         onNavigate={handleNavigate}
+        onSwitchPortal={() => router.push('/corporate/profile')}
       />
       <main className="p-6">
         <RegistrationManagement />
