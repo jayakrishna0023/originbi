@@ -206,12 +206,19 @@ const ResetPasswordForm: React.FC = () => {
                             type={passwordVisible ? 'text' : 'password'}
                             value={newPassword}
                             onChange={(e) => {
-                                setNewPassword(e.target.value);
-                                if (error) setError('');
-                            }}
-                            onBlur={() => {
-                                const pwdError = validatePassword(newPassword);
-                                if (pwdError) setError(pwdError);
+                                const val = e.target.value;
+                                setNewPassword(val);
+                                // Real-time validation (Sequential)
+                                if (val.length > 0) {
+                                    if (val.length < 8) setError('Password must be at least 8 characters long.');
+                                    else if (!/[A-Z]/.test(val)) setError('Password must contain at least one uppercase letter.');
+                                    else if (!/[a-z]/.test(val)) setError('Password must contain at least one lowercase letter.');
+                                    else if (!/[0-9]/.test(val)) setError('Password must contain at least one number.');
+                                    else if (!/[\W_]/.test(val)) setError('Password must contain at least one special character.');
+                                    else setError(''); // All good
+                                } else {
+                                    setError('');
+                                }
                             }}
                             className="bg-brand-light-secondary dark:bg-brand-dark-tertiary border border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary font-sans text-[clamp(14px,0.83vw,16px)] font-normal leading-none tracking-[0px] rounded-full block w-full pr-12 transition-colors duration-300 focus:ring-brand-green focus:border-brand-green"
                             style={{ padding: 'clamp(14px,1vw,20px)' }}
@@ -244,12 +251,14 @@ const ResetPasswordForm: React.FC = () => {
                             type={confirmPasswordVisible ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => {
-                                setConfirmPassword(e.target.value);
-                                if (error) setError('');
-                            }}
-                            onBlur={() => {
-                                if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+                                const val = e.target.value;
+                                setConfirmPassword(val);
+                                if (val && newPassword && val !== newPassword) {
                                     setError('Passwords do not match.');
+                                } else if (val && newPassword && val === newPassword) {
+                                    // Re-check new password validity to be safe, or clear error
+                                    const pwdError = validatePassword(newPassword);
+                                    setError(pwdError);
                                 }
                             }}
                             className="bg-brand-light-secondary dark:bg-brand-dark-tertiary border border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary font-sans text-[clamp(14px,0.83vw,16px)] font-normal leading-none tracking-[0px] rounded-full block w-full pr-12 transition-colors duration-300 focus:ring-brand-green focus:border-brand-green"

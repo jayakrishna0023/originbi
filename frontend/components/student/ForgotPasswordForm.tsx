@@ -70,6 +70,7 @@ const ForgotPasswordForm: React.FC = () => {
                     type="email"
                     id="email"
                     value={email}
+                    autoFocus
                     onChange={(e) => setEmail(e.target.value)}
                     className={`bg-brand-light-secondary dark:bg-brand-dark-tertiary border text-brand-text-light-primary dark:text-brand-text-primary placeholder:text-brand-text-light-secondary dark:placeholder:text-brand-text-secondary font-sans text-[clamp(14px,0.83vw,16px)] font-normal leading-none tracking-[0px] rounded-full block w-full transition-colors duration-300 ${error && error.includes('Email')
                         ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
