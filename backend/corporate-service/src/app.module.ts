@@ -12,16 +12,28 @@ import { CorporateDashboardModule } from './dashboard/corporate-dashboard.module
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                type: 'postgres',
-                host: config.get<string>('DB_HOST'),
-                port: Number(config.get<string>('DB_PORT') || 5432),
-                username: config.get<string>('DB_USER'),
-                password: config.get<string>('DB_PASS'),
-                database: config.get<string>('DB_NAME'),
-                autoLoadEntities: true,
-                synchronize: false,
-            }),
+            useFactory: (config: ConfigService) => {
+                const databaseUrl = config.get<string>('DATABASE_URL');
+                if (databaseUrl) {
+                    return {
+                        type: 'postgres',
+                        url: databaseUrl,
+                        autoLoadEntities: true,
+                        synchronize: false,
+                        ssl: { rejectUnauthorized: false }, // Often required for cloud DBs like Neon
+                    };
+                }
+                return {
+                    type: 'postgres',
+                    host: config.get<string>('DB_HOST'),
+                    port: Number(config.get<string>('DB_PORT') || 5432),
+                    username: config.get<string>('DB_USER'),
+                    password: config.get<string>('DB_PASS'),
+                    database: config.get<string>('DB_NAME'),
+                    autoLoadEntities: true,
+                    synchronize: false,
+                };
+            },
         }),
         CorporateDashboardModule,
     ],
