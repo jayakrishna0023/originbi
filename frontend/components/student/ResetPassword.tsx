@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Logo from '@/components/ui/Logo';
 import ResetPasswordForm from '@/components/student/ResetPasswordForm';
 import ForgotPasswordHero from '@/components/student/ForgotPasswordHero';
@@ -47,7 +47,9 @@ const ResetPassword: React.FC = () => {
                             </p>
                             <div className="w-full h-px bg-brand-light-tertiary dark:bg-white/10 mt-[clamp(20px,2vw,40px)]" />
                         </div>
-                        <ResetPasswordForm />
+                        <Suspense fallback={<div className="animate-pulse h-64 w-full bg-gray-200 dark:bg-white/5 rounded-2xl"></div>}>
+                            <ResetPasswordForm />
+                        </Suspense>
                     </div>
 
                     {/* Footer */}
