@@ -21,6 +21,7 @@ import { ForgotPasswordModule } from './forgotpassword/forgotpassword.module';
                         url: databaseUrl,
                         autoLoadEntities: true,
                         synchronize: false,
+                        ssl: { rejectUnauthorized: false },
                     };
                 }
                 return {
