@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Query, Param } from '@nestjs/common';
+import { Body, Controller, Post, Get, Patch, Query, Param } from '@nestjs/common';
 import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 
@@ -36,4 +36,8 @@ export class RegistrationsController {
     return this.registrationsService.findAll(pageNum, limitNum, tab, search);
   }
 
+  @Patch(':id/status')
+  async updateStatus(@Param('id') id: string, @Body('status') status: string) {
+    return this.registrationsService.updateStatus(id, status);
+  }
 }

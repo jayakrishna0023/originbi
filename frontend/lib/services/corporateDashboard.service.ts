@@ -112,5 +112,25 @@ export const corporateDashboardService = {
             return { success: false };
         }
         return res.json();
+    },
+
+    async getMyEmployees(email: string, page = 1, limit = 10, search = '') {
+        const token = AuthService.getToken();
+        const res = await fetch(
+            `${API_URL}/dashboard/my-employees?email=${encodeURIComponent(email)}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error("Failed to fetch employees");
+        }
+
+        return res.json();
     }
 };

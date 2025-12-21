@@ -23,15 +23,19 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "cognitoSub", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'full_name', nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "fullName", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'email_verified', default: false }),
     __metadata("design:type", Boolean)
 ], User.prototype, "emailVerified", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "role", void 0);
 __decorate([
@@ -51,6 +55,22 @@ __decorate([
     __metadata("design:type", Object)
 ], User.prototype, "metadata", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'first_login_at', type: 'timestamp with time zone', nullable: true }),
+    __metadata("design:type", Date)
+], User.prototype, "firstLoginAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'last_login_at', type: 'timestamp with time zone', nullable: true }),
+    __metadata("design:type", Date)
+], User.prototype, "lastLoginAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'last_login_ip', nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "lastLoginIp", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'login_count', default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "loginCount", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
@@ -58,6 +78,10 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)({ name: 'updated_at' }),
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'corporate_id', nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "corporateId", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

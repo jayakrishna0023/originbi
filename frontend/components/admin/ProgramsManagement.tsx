@@ -236,15 +236,17 @@ const ProgramsManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <ProgramsTable
-        programs={programs}
-        loading={loading}
-        error={error}
-        onToggleStatus={handleToggleStatus}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {/* Table Area - flex-1 ensures it fills available vertical space */}
+      <div className="flex-1 min-h-[300px] relative flex flex-col">
+        <ProgramsTable
+          programs={programs}
+          loading={loading}
+          error={error}
+          onToggleStatus={handleToggleStatus}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </div>
     </div>
   );
 };

@@ -3,4 +3,6 @@ export declare class User {
     email: string;
     fullName: string;
     role: string;
+    corporateId: string;
+    createdAt: Date;
 }

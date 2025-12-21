@@ -32,7 +32,7 @@ exports.AppModule = AppModule = __decorate([
                             type: 'postgres',
                             url: databaseUrl,
                             autoLoadEntities: true,
-                            synchronize: false,
+                            synchronize: true,
                             ssl: { rejectUnauthorized: false },
                         };
                     }
@@ -44,7 +44,7 @@ exports.AppModule = AppModule = __decorate([
                         password: config.get('DB_PASS'),
                         database: config.get('DB_NAME'),
                         autoLoadEntities: true,
-                        synchronize: false,
+                        synchronize: true,
                         ssl: false,
                     };
                 },

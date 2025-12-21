@@ -14,13 +14,16 @@ export class User {
     @Column({ name: 'cognito_sub', nullable: true })
     cognitoSub?: string;
 
-    @Column()
+    @Column({ nullable: true })
     email: string;
+
+    @Column({ name: 'full_name', nullable: true })
+    fullName: string;
 
     @Column({ name: 'email_verified', default: false })
     emailVerified: boolean;
 
-    @Column()
+    @Column({ nullable: true })
     role: string;
 
     @Column({ name: 'avatar_url', nullable: true })
@@ -36,9 +39,24 @@ export class User {
     @Column({ name: 'metadata', type: 'jsonb', default: () => `'{}'` })
     metadata: any;
 
+    @Column({ name: 'first_login_at', type: 'timestamp with time zone', nullable: true })
+    firstLoginAt?: Date;
+
+    @Column({ name: 'last_login_at', type: 'timestamp with time zone', nullable: true })
+    lastLoginAt?: Date;
+
+    @Column({ name: 'last_login_ip', nullable: true })
+    lastLoginIp?: string;
+
+    @Column({ name: 'login_count', default: 0 })
+    loginCount: number;
+
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
+
+    @Column({ name: 'corporate_id', nullable: true })
+    corporateId: string;
 }

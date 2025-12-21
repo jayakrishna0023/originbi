@@ -18,42 +18,27 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   offLabel = "OFF",
 }) => {
   return (
-    <button
-      type="button"
+    <div
       onClick={!disabled ? onToggle : undefined}
-      disabled={disabled}
-      role="switch"
-      aria-checked={isOn}
-      className={`relative inline-flex items-center h-6 w-14 shrink-0 rounded-full transition-colors duration-300 focus:outline-none ${isOn
+      className={`relative inline-flex items-center w-[56px] h-[26px] shrink-0 rounded-full transition-colors duration-300 focus:outline-none cursor-pointer ${isOn
         ? activeColor
-        : 'bg-brand-light-tertiary dark:bg-brand-dark-tertiary'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        : 'bg-gray-200 dark:bg-gray-700'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
-      <span className="sr-only">Toggle</span>
-
-      {/* Text inside the toggle */}
-      <span
-        aria-hidden="true"
-        className="absolute left-0 flex w-full items-center justify-between px-[10px] text-[10px] font-semibold"
-      >
-        <span className={isOn ? 'text-white' : 'text-transparent'}>{onLabel}</span>
-        <span
-          className={
-            !isOn
-              ? 'text-brand-text-light-secondary dark:text-brand-text-secondary'
-              : 'text-transparent'
-          }
-        >
-          {offLabel}
-        </span>
+      {/* Text Labels */}
+      <span className={`text-[9px] font-bold text-white absolute left-2 transition-opacity duration-300 ${isOn ? 'opacity-100' : 'opacity-0'}`}>
+        {onLabel}
+      </span>
+      <span className={`text-[9px] font-bold text-gray-500 absolute right-2 transition-opacity duration-300 ${isOn ? 'opacity-0' : 'opacity-100'}`}>
+        {offLabel}
       </span>
 
       {/* Sliding thumb */}
-      <span
-        className={`inline-block h-3 w-3 rounded-full bg-white shadow-md ring-0 transform transition-transform duration-300 ease-in-out ${isOn ? 'translate-x-9' : 'translate-x-1'
+      <div
+        className={`absolute top-[3px] left-[3px] bg-white rounded-full h-5 w-5 shadow-md transform transition-transform duration-300 ease-in-out ${isOn ? 'translate-x-[30px]' : 'translate-x-0'
           }`}
       />
-    </button>
+    </div>
   );
 };
 

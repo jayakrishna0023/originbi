@@ -16,18 +16,23 @@ export default function CorporateDashboardPage() {
   };
 
   const handleNavigate = (
-    view: "dashboard" | "assessment" | "registrations"
+    view: "dashboard" | "assessment" | "registrations" | "jobs" | "origindata" | "settings"
   ) => {
     if (view === "dashboard") {
       router.push("/corporate/dashboard");
     }
-
     if (view === "registrations") {
-      // this is your “My Employees” / RegistrationManagement page
       router.push("/corporate/registrations");
     }
-
-    // "assessment" you can hook later for corporate, so ignore for now
+    if (view === "jobs") {
+      router.push("/corporate/jobs");
+    }
+    if (view === "origindata") {
+      router.push("/corporate/origindata");
+    }
+    if (view === "settings") {
+      router.push("/corporate/settings");
+    }
   };
 
   return (

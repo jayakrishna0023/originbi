@@ -21,7 +21,6 @@ export class CorporateAccount {
 
     @OneToOne(() => User)
     @JoinColumn({ name: 'user_id' })
-    @JoinColumn({ name: 'user_id' })
     user: User;
 
     @Column({ name: 'full_name', length: 250, nullable: true })

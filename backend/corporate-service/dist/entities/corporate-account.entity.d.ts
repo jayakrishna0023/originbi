@@ -9,6 +9,7 @@ export declare class CorporateAccount {
     totalCredits: number;
     employeeRefId?: string;
     isActive: boolean;
+    isBlocked: boolean;
     creditLedgers: CorporateCreditLedger[];
     fullName?: string;
     sectorCode?: string;

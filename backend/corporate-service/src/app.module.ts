@@ -21,7 +21,7 @@ import { CorporateDashboardModule } from './dashboard/corporate-dashboard.module
                         type: 'postgres',
                         url: databaseUrl,
                         autoLoadEntities: true,
-                        synchronize: false,
+                        synchronize: true,
                         ssl: { rejectUnauthorized: false },
                     };
                 }
@@ -34,7 +34,7 @@ import { CorporateDashboardModule } from './dashboard/corporate-dashboard.module
                     password: config.get<string>('DB_PASS'),
                     database: config.get<string>('DB_NAME'),
                     autoLoadEntities: true,
-                    synchronize: false,
+                    synchronize: true,
                     ssl: false,
                 };
             },
