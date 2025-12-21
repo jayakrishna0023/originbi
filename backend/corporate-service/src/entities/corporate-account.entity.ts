@@ -39,6 +39,9 @@ export class CorporateAccount {
     @Column({ name: 'is_active', default: true })
     isActive: boolean;
 
+    @Column({ name: 'is_blocked', default: false })
+    isBlocked: boolean;
+
     @OneToMany(() => CorporateCreditLedger, (ledger) => ledger.corporateAccount)
     creditLedgers: CorporateCreditLedger[];
 

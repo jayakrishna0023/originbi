@@ -476,7 +476,7 @@ const RegistrationManagement: React.FC = () => {
               className={`min-w-[32px] h-8 px-1 rounded-md font-medium text-sm flex items-center justify-center transition-colors border ${currentPage === page
                 ? "bg-brand-green border-brand-green text-white shadow-lg shadow-brand-green/20"
                 : typeof page === "number"
-                  ? "bg-transparent border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-gray-400 hover:border-brand-text-light-secondary dark:hover:border-gray-500"
+                  ? "bg-transparent dark:bg-[#19211C] border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-gray-400 hover:border-brand-text-light-secondary dark:hover:border-gray-500"
                   : "border-transparent text-gray-500 cursor-default"
                 }`}
             >
@@ -491,13 +491,6 @@ const RegistrationManagement: React.FC = () => {
           >
             <ArrowRightWithoutLineIcon className="w-3 h-3" />
           </button>
-        </div>
-
-        <div className="text-right hidden sm:block">
-          &copy; 2025 Origin BI, Made with by{" "}
-          <span className="underline hover:text-brand-green transition-colors cursor-pointer">
-            Touchmark Descience Pvt. Ltd.
-          </span>
         </div>
       </div>
     </div>

@@ -69,6 +69,11 @@ let CorporateDashboardController = class CorporateDashboardController {
     async registerCorporate(dto) {
         return this.dashboardService.registerCorporate(dto);
     }
+    async getMyEmployees(email, page = 1, limit = 10, search) {
+        if (!email)
+            throw new common_1.BadRequestException('Email is required');
+        return this.dashboardService.getMyEmployees(email, page, limit, search);
+    }
 };
 exports.CorporateDashboardController = CorporateDashboardController;
 __decorate([
@@ -143,6 +148,16 @@ __decorate([
     __metadata("design:paramtypes", [register_corporate_dto_1.RegisterCorporateDto]),
     __metadata("design:returntype", Promise)
 ], CorporateDashboardController.prototype, "registerCorporate", null);
+__decorate([
+    (0, common_1.Get)('my-employees'),
+    __param(0, (0, common_1.Query)('email')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __param(3, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, Number, String]),
+    __metadata("design:returntype", Promise)
+], CorporateDashboardController.prototype, "getMyEmployees", null);
 exports.CorporateDashboardController = CorporateDashboardController = __decorate([
     (0, common_1.Controller)('dashboard'),
     __metadata("design:paramtypes", [corporate_dashboard_service_1.CorporateDashboardService])

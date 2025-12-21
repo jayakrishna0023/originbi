@@ -2,7 +2,7 @@
 
 import React from "react";
 import Header from "@/components/corporate/Header";
-import RegistrationManagement from "@/components/corporate/RegistrationManagement";
+import MyEmployees from "@/components/corporate/MyEmployees";
 import { useRouter } from "next/navigation";
 
 export default function RegistrationsPage() {
@@ -14,11 +14,13 @@ export default function RegistrationsPage() {
   };
 
   const handleNavigate = (
-    view: "dashboard" | "assessment" | "registrations"
+    view: "dashboard" | "assessment" | "registrations" | "jobs" | "origindata" | "settings"
   ) => {
     if (view === "dashboard") router.push("/corporate/dashboard");
     if (view === "registrations") router.push("/corporate/registrations");
-    // "assessment" is not used for corporate now, so we can safely ignore it
+    if (view === "jobs") router.push("/corporate/jobs");
+    if (view === "origindata") router.push("/corporate/origindata");
+    if (view === "settings") router.push("/corporate/settings");
   };
 
   return (
@@ -31,7 +33,7 @@ export default function RegistrationsPage() {
         onSwitchPortal={() => router.push('/corporate/profile')}
       />
       <main className="p-6">
-        <RegistrationManagement />
+        <MyEmployees />
       </main>
     </div>
   );

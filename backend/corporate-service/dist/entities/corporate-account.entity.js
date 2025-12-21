@@ -50,6 +50,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CorporateAccount.prototype, "isActive", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'is_blocked', default: false }),
+    __metadata("design:type", Boolean)
+], CorporateAccount.prototype, "isBlocked", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => corporate_credit_ledger_entity_1.CorporateCreditLedger, (ledger) => ledger.corporateAccount),
     __metadata("design:type", Array)
 ], CorporateAccount.prototype, "creditLedgers", void 0);

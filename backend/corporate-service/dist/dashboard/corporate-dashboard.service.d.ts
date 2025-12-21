@@ -6,18 +6,20 @@ import { User } from '../entities/user.entity';
 import { CorporateAccount } from '../entities/corporate-account.entity';
 import { CorporateCreditLedger } from '../entities/corporate-credit-ledger.entity';
 import { UserActionLog } from '../entities/user-action-log.entity';
+import { Registration } from '../entities/registration.entity';
 export declare class CorporateDashboardService {
     private readonly userRepo;
     private readonly corporateRepo;
     private actionLogRepository;
     private readonly ledgerRepo;
+    private readonly registrationRepo;
     private httpService;
     private configService;
     private readonly dataSource;
     private authServiceUrl;
     private razorpay;
     private perCreditCost;
-    constructor(userRepo: Repository<User>, corporateRepo: Repository<CorporateAccount>, actionLogRepository: Repository<UserActionLog>, ledgerRepo: Repository<CorporateCreditLedger>, httpService: HttpService, configService: ConfigService, dataSource: DataSource);
+    constructor(userRepo: Repository<User>, corporateRepo: Repository<CorporateAccount>, actionLogRepository: Repository<UserActionLog>, ledgerRepo: Repository<CorporateCreditLedger>, registrationRepo: Repository<Registration>, httpService: HttpService, configService: ConfigService, dataSource: DataSource);
     getStats(email: string): Promise<{
         companyName: string;
         availableCredits: number;
@@ -62,6 +64,7 @@ export declare class CorporateDashboardService {
         totalCredits: number;
         employeeRefId?: string;
         isActive: boolean;
+        isBlocked: boolean;
         creditLedgers: CorporateCreditLedger[];
         fullName?: string;
         sectorCode?: string;
@@ -117,5 +120,11 @@ export declare class CorporateDashboardService {
         success: boolean;
         newAvailable: number;
         newTotal: number;
+    }>;
+    getMyEmployees(email: string, page?: number, limit?: number, search?: string): Promise<{
+        data: Registration[];
+        total: number;
+        page: number;
+        limit: number;
     }>;
 }

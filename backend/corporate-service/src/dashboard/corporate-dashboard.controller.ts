@@ -86,4 +86,15 @@ export class CorporateDashboardController {
     async registerCorporate(@Body() dto: RegisterCorporateDto) {
         return this.dashboardService.registerCorporate(dto);
     }
+
+    @Get('my-employees')
+    async getMyEmployees(
+        @Query('email') email: string,
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 10,
+        @Query('search') search?: string,
+    ) {
+        if (!email) throw new BadRequestException('Email is required');
+        return this.dashboardService.getMyEmployees(email, page, limit, search);
+    }
 }

@@ -41,6 +41,7 @@ export declare class CorporateDashboardController {
         totalCredits: number;
         employeeRefId?: string;
         isActive: boolean;
+        isBlocked: boolean;
         creditLedgers: import("../entities/corporate-credit-ledger.entity").CorporateCreditLedger[];
         fullName?: string;
         sectorCode?: string;
@@ -95,5 +96,11 @@ export declare class CorporateDashboardController {
     registerCorporate(dto: RegisterCorporateDto): Promise<{
         success: boolean;
         message: string;
+    }>;
+    getMyEmployees(email: string, page?: number, limit?: number, search?: string): Promise<{
+        data: import("../entities/registration.entity").Registration[];
+        total: number;
+        page: number;
+        limit: number;
     }>;
 }

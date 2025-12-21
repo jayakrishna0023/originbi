@@ -24,12 +24,14 @@ const user_entity_1 = require("../entities/user.entity");
 const corporate_account_entity_1 = require("../entities/corporate-account.entity");
 const corporate_credit_ledger_entity_1 = require("../entities/corporate-credit-ledger.entity");
 const user_action_log_entity_1 = require("../entities/user-action-log.entity");
+const registration_entity_1 = require("../entities/registration.entity");
 let CorporateDashboardService = class CorporateDashboardService {
-    constructor(userRepo, corporateRepo, actionLogRepository, ledgerRepo, httpService, configService, dataSource) {
+    constructor(userRepo, corporateRepo, actionLogRepository, ledgerRepo, registrationRepo, httpService, configService, dataSource) {
         this.userRepo = userRepo;
         this.corporateRepo = corporateRepo;
         this.actionLogRepository = actionLogRepository;
         this.ledgerRepo = ledgerRepo;
+        this.registrationRepo = registrationRepo;
         this.httpService = httpService;
         this.configService = configService;
         this.dataSource = dataSource;
@@ -544,6 +546,31 @@ let CorporateDashboardService = class CorporateDashboardService {
             newTotal: corporate.totalCredits,
         };
     }
+    async getMyEmployees(email, page = 1, limit = 10, search) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        const corporate = await this.corporateRepo.findOne({ where: { userId: user.id } });
+        if (!corporate)
+            throw new common_1.NotFoundException('Corporate account not found');
+        const query = this.registrationRepo.createQueryBuilder('registration')
+            .leftJoinAndSelect('registration.user', 'user')
+            .where('registration.corporateAccountId = :corpId', { corpId: corporate.id });
+        if (search) {
+            query.andWhere('(registration.fullName ILIKE :search OR registration.mobileNumber ILIKE :search OR user.email ILIKE :search)', { search: `%${search}%` });
+        }
+        const [data, total] = await query
+            .skip((page - 1) * limit)
+            .take(limit)
+            .orderBy('registration.createdAt', 'DESC')
+            .getManyAndCount();
+        return {
+            data,
+            total,
+            page,
+            limit
+        };
+    }
 };
 exports.CorporateDashboardService = CorporateDashboardService;
 exports.CorporateDashboardService = CorporateDashboardService = __decorate([
@@ -552,7 +579,9 @@ exports.CorporateDashboardService = CorporateDashboardService = __decorate([
     __param(1, (0, typeorm_1.InjectRepository)(corporate_account_entity_1.CorporateAccount)),
     __param(2, (0, typeorm_1.InjectRepository)(user_action_log_entity_1.UserActionLog)),
     __param(3, (0, typeorm_1.InjectRepository)(corporate_credit_ledger_entity_1.CorporateCreditLedger)),
+    __param(4, (0, typeorm_1.InjectRepository)(registration_entity_1.Registration)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

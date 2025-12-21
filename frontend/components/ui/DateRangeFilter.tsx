@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CalendarIcon, ChevronDownIcon} from '@/components/icons';
+import { CalendarIcon, ChevronDownIcon } from '@/components/icons';
 
 export type DateRangeOption = 'Today' | 'Yesterday' | 'Last 7 Days' | 'Last 30 Days' | 'This Month' | 'Last Month' | 'Custom Range';
 
@@ -13,12 +13,12 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ selectedRange, onRang
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const options: DateRangeOption[] = [
-        'Today', 
-        'Yesterday', 
-        'Last 7 Days', 
+        'Today',
+        'Yesterday',
+        'Last 7 Days',
         'Last 30 Days',
-        'This Month', 
-        'Last Month', 
+        'This Month',
+        'Last Month',
         'Custom Range'
     ];
 
@@ -42,9 +42,9 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ selectedRange, onRang
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-2 px-4 py-2.5 bg-brand-light-tertiary dark:bg-[#24272B] border border-transparent hover:border-brand-light-tertiary dark:hover:border-white/10 rounded-lg text-sm font-medium transition-all whitespace-nowrap group ${isCustom ? 'text-brand-green' : 'text-brand-text-light-primary dark:text-white'}`}
+                className={`flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#FFFFFF1F] border border-gray-200 dark:border-[#FFFFFF1F] hover:bg-gray-50 dark:hover:bg-white/30 rounded-lg text-sm font-medium transition-all whitespace-nowrap group shadow-sm ${isCustom ? 'text-brand-green' : 'text-[#19211C] dark:text-white'}`}
             >
                 <CalendarIcon className="w-4 h-4 text-brand-green" />
                 <span>{selectedRange}</span>
@@ -58,11 +58,10 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ selectedRange, onRang
                             <button
                                 key={option}
                                 onClick={() => handleSelect(option)}
-                                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between group ${
-                                    selectedRange === option 
-                                        ? 'text-brand-green font-semibold bg-brand-green/5' 
-                                        : 'text-brand-text-light-primary dark:text-gray-300 hover:bg-brand-light-tertiary dark:hover:bg-white/5'
-                                } ${option === 'Custom Range' ? 'text-brand-green font-medium' : ''}`}
+                                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between group ${selectedRange === option
+                                    ? 'text-brand-green font-semibold bg-brand-green/5'
+                                    : 'text-brand-text-light-primary dark:text-gray-300 hover:bg-brand-light-tertiary dark:hover:bg-white/5'
+                                    } ${option === 'Custom Range' ? 'text-brand-green font-medium' : ''}`}
                             >
                                 {option}
                                 {selectedRange === option && <div className="w-1.5 h-1.5 rounded-full bg-brand-green"></div>}

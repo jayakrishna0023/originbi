@@ -11,6 +11,7 @@ import { User } from '../entities/user.entity';
 import { CorporateAccount } from '../entities/corporate-account.entity';
 import { CorporateCreditLedger } from '../entities/corporate-credit-ledger.entity';
 import { UserActionLog, ActionType, UserRole } from '../entities/user-action-log.entity';
+import { Registration } from '../entities/registration.entity';
 
 @Injectable()
 export class CorporateDashboardService {
@@ -27,6 +28,8 @@ export class CorporateDashboardService {
         private actionLogRepository: Repository<UserActionLog>,
         @InjectRepository(CorporateCreditLedger)
         private readonly ledgerRepo: Repository<CorporateCreditLedger>,
+        @InjectRepository(Registration)
+        private readonly registrationRepo: Repository<Registration>,
         private httpService: HttpService,
         private configService: ConfigService,
         private readonly dataSource: DataSource,
@@ -669,6 +672,38 @@ export class CorporateDashboardService {
             success: true,
             newAvailable: corporate.availableCredits,
             newTotal: corporate.totalCredits,
+        };
+    }
+
+    async getMyEmployees(email: string, page: number = 1, limit: number = 10, search?: string) {
+        const user = await this.userRepo.findOne({ where: { email } });
+        if (!user) throw new NotFoundException('User not found');
+
+        const corporate = await this.corporateRepo.findOne({ where: { userId: user.id } });
+        if (!corporate) throw new NotFoundException('Corporate account not found');
+
+        const query = this.registrationRepo.createQueryBuilder('registration')
+            .leftJoinAndSelect('registration.user', 'user')
+            .where('registration.corporateAccountId = :corpId', { corpId: corporate.id });
+
+        if (search) {
+            query.andWhere(
+                '(registration.fullName ILIKE :search OR registration.mobileNumber ILIKE :search OR user.email ILIKE :search)',
+                { search: `%${search}%` }
+            );
+        }
+
+        const [data, total] = await query
+            .skip((page - 1) * limit)
+            .take(limit)
+            .orderBy('registration.createdAt', 'DESC')
+            .getManyAndCount();
+
+        return {
+            data,
+            total,
+            page,
+            limit
         };
     }
 }

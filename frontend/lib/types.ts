@@ -59,6 +59,8 @@ export interface User {
   email: string;
   email_verified: boolean;
   role: "ADMIN" | "CORPORATE" | "STUDENT" | "RESELLER";
+  full_name?: string;
+  corporate_id?: string;
   avatar_url?: string;
   is_active: boolean;
   is_blocked: boolean;

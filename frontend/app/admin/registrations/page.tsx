@@ -43,7 +43,7 @@ export default function RegistrationsPage() {
         onNavigate={handleNavigate}
         onLogout={handleLogout}
       />
-      <main className="p-6">
+      <main className="">
         <RegistrationManagement />
       </main>
     </div>

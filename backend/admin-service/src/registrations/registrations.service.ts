@@ -9,6 +9,7 @@ import { Repository, DataSource } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
+
 import { User } from '../users/user.entity';
 import { Registration } from './registration.entity';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
@@ -245,7 +246,13 @@ export class RegistrationsService {
       // H. Send Email (Best Effort)
       if (dto.sendEmail && dto.password) {
         try {
-          await this.sendWelcomeEmail(dto.email, dto.name, dto.password);
+          await this.sendWelcomeEmail(
+            dto.email,
+            dto.name,
+            dto.password,
+            validFrom,
+            defaultProgram.assessment_title || defaultProgram.name
+          );
         } catch (emailErr) {
           this.logger.error('Failed to send welcome email', emailErr);
           // Do not rollback
@@ -307,6 +314,20 @@ export class RegistrationsService {
   }
 
   // ---------------------------------------------------------
+  // UPDATE STATUS
+  // ---------------------------------------------------------
+  async updateStatus(id: string, status: string) {
+    const reg = await this.regRepo.findOne({ where: { id: BigInt(id) as any } });
+    if (!reg) {
+      throw new BadRequestException('Registration not found');
+    }
+    reg.status = status as any;
+    // If we need to sync with User.isActive, do it here.
+    // e.g. if status === 'CANCELLED', user.isActive = false.
+    return this.regRepo.save(reg);
+  }
+
+  // ---------------------------------------------------------
   // Helper: Send Welcome Email
   // ---------------------------------------------------------
   private async sendWelcomeEmail(to: string, name: string, pass: string, startDateTime?: Date | string, assessmentTitle?: string) {
@@ -330,14 +351,30 @@ export class RegistrationsService {
       html: '',
     };
 
-    // Use hosted assets for consistent rendering without attachments
-    // In production, BACKEND_URL must be set to the public domain
-    const baseUrl = process.env.BACKEND_URL || 'http://localhost:4001';
+    // Use local assets with CID for robust delivery
+    const assetPath = path.join(process.cwd(), 'src/mail/assets');
+    const attachments = [
+      {
+        filename: 'Popper.png',
+        path: path.join(assetPath, 'Popper.png'),
+        cid: 'popper',
+      },
+      {
+        filename: 'Pattern_mask.png',
+        path: path.join(assetPath, 'Pattern_mask.png'),
+        cid: 'pattern',
+      },
+      {
+        filename: 'Email_Vector.png',
+        path: path.join(assetPath, 'Email_Vector.png'),
+        cid: 'footer',
+      },
+    ];
 
     const assets = {
-      popper: `${baseUrl}/test/assets/Popper.png`,
-      pattern: `${baseUrl}/test/assets/Pattern_mask.png`,
-      footer: `${baseUrl}/test/assets/Email_Vector.png`,
+      popper: 'cid:popper',
+      pattern: 'cid:pattern',
+      footer: 'cid:footer',
     };
 
     mailOptions.html = getWelcomeEmailTemplate(
@@ -349,6 +386,9 @@ export class RegistrationsService {
       startDateTime,
       assessmentTitle
     );
+
+    // Add attachments to mailOptions
+    Object.assign(mailOptions, { attachments });
 
     return transporter.sendMail(mailOptions);
   }
