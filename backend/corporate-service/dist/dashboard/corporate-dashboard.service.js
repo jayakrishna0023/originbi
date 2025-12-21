@@ -222,11 +222,12 @@ let CorporateDashboardService = class CorporateDashboardService {
                 secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
             },
         });
+        const serviceUrl = this.configService.get('CORPORATE_SERVICE_URL') || 'http://localhost:4003';
         const assets = {
-            logo: "https://originbi.com/wp-content/uploads/2023/11/Origin-BI-Logo-01.png",
-            popper: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/celebration-popper.png",
-            pattern: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/pattern-bg.png",
-            footer: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/email-footer.png"
+            logo: `${serviceUrl}/email-assets/logo.png`,
+            popper: `${serviceUrl}/email-assets/Popper.png`,
+            pattern: `${serviceUrl}/email-assets/Pattern_mask.png`,
+            footer: `${serviceUrl}/email-assets/Email_Vector.png`
         };
         const htmlContent = getRegistrationSuccessEmailTemplate(data.name, data.companyName, data.email, data.mobile, data.password, `${data.loginUrl}/corporate/login`, assets);
         const params = {
@@ -430,11 +431,12 @@ let CorporateDashboardService = class CorporateDashboardService {
                 secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
             },
         });
+        const serviceUrl = this.configService.get('CORPORATE_SERVICE_URL') || 'http://localhost:4003';
         const assets = {
-            logo: "https://originbi.com/wp-content/uploads/2023/11/Origin-BI-Logo-01.png",
-            popper: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/celebration-popper.png",
-            pattern: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/pattern-bg.png",
-            footer: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/email-footer.png"
+            logo: `${serviceUrl}/email-assets/logo.png`,
+            popper: `${serviceUrl}/email-assets/Popper.png`,
+            pattern: `${serviceUrl}/email-assets/Pattern_mask.png`,
+            footer: `${serviceUrl}/email-assets/Email_Vector.png`
         };
         const htmlContent = getPaymentSuccessEmailTemplate(data.name, data.paymentId, data.amount, data.credits, data.date, `${data.dashboardUrl}/corporate/dashboard`, assets);
         const params = {

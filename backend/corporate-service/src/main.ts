@@ -12,6 +12,11 @@ async function bootstrap() {
         credentials: true,
     });
 
+    // Serve static email assets
+    const express = require('express');
+    const { join } = require('path');
+    app.use('/email-assets', express.static(join(__dirname, 'mail', 'assets')));
+
     const port = process.env.PORT || 4003;
     await app.listen(port);
     console.log(`[corporate-service] running on http://localhost:${port}`);

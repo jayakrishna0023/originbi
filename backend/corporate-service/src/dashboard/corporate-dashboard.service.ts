@@ -260,11 +260,13 @@ export class CorporateDashboardService {
         });
 
         // Assets (Using public URLs or placeholders similar to Admin Service)
+        const serviceUrl = this.configService.get<string>('CORPORATE_SERVICE_URL') || 'http://localhost:4003';
+        // Assets served statically from /email-assets
         const assets = {
-            logo: "https://originbi.com/wp-content/uploads/2023/11/Origin-BI-Logo-01.png", // Public Logo
-            popper: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/celebration-popper.png", // Assuming S3 or use a public one
-            pattern: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/pattern-bg.png",
-            footer: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/email-footer.png"
+            logo: `${serviceUrl}/email-assets/logo.png`,
+            popper: `${serviceUrl}/email-assets/Popper.png`,
+            pattern: `${serviceUrl}/email-assets/Pattern_mask.png`,
+            footer: `${serviceUrl}/email-assets/Email_Vector.png`
         };
 
         // Use the TS template function
@@ -537,11 +539,13 @@ export class CorporateDashboardService {
         });
 
         // Assets (Using public URLs or placeholders similar to Admin Service)
+        const serviceUrl = this.configService.get<string>('CORPORATE_SERVICE_URL') || 'http://localhost:4003';
+        // Assets served statically from /email-assets
         const assets = {
-            logo: "https://originbi.com/wp-content/uploads/2023/11/Origin-BI-Logo-01.png",
-            popper: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/celebration-popper.png",
-            pattern: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/pattern-bg.png",
-            footer: "https://originbi-assets.s3.ap-south-1.amazonaws.com/email-assets/email-footer.png"
+            logo: `${serviceUrl}/email-assets/logo.png`,
+            popper: `${serviceUrl}/email-assets/Popper.png`,
+            pattern: `${serviceUrl}/email-assets/Pattern_mask.png`,
+            footer: `${serviceUrl}/email-assets/Email_Vector.png`
         };
 
         const htmlContent = getPaymentSuccessEmailTemplate(
