@@ -48,7 +48,7 @@ export class AdminLoginGuard implements CanActivate {
     }
 
     // 4) Attach user
-    (req as any).user = user;
+    req.user = user;
     return true;
   }
 }
