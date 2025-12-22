@@ -163,7 +163,7 @@ const CorporateManagement: React.FC = () => {
             Corporate Access
           </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-brand-text-light-primary dark:text-white">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-[#150089] dark:text-white">
           Corporate Registrations
         </h1>
       </div>
@@ -180,7 +180,7 @@ const CorporateManagement: React.FC = () => {
               setCurrentPage(1);
             }}
             placeholder="Search name, email, mobile..."
-            className="w-full bg-transparent border border-brand-light-tertiary dark:border-brand-dark-tertiary rounded-lg py-2.5 pl-4 pr-10 text-sm text-brand-text-light-primary dark:text-white placeholder-brand-text-light-secondary dark:placeholder-brand-text-secondary focus:outline-none focus:border-brand-green transition-colors"
+            className="w-full bg-transparent border border-[#19211C]/40 dark:border-brand-dark-tertiary rounded-xl py-2.5 pl-4 pr-10 text-sm text-[#19211C] dark:text-white placeholder-[#19211C]/80 placeholder:font-normal dark:placeholder-brand-text-secondary focus:outline-none focus:border-brand-green transition-colors"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-light-secondary dark:text-brand-text-secondary">
             <svg
@@ -201,12 +201,48 @@ const CorporateManagement: React.FC = () => {
 
         {/* Right side – Add New */}
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+          {/* Top Pagination Row (Compact) */}
+          <div className="flex items-center gap-3 w-full xl:w-auto justify-end mr-4">
+            <span className="text-sm text-[#19211C] dark:text-brand-text-secondary hidden sm:inline font-[300]">
+              Showing
+            </span>
+            <div className="relative">
+              <button
+                onClick={() => setShowEntriesDropdown(!showEntriesDropdown)}
+                className="flex items-center gap-2 bg-white dark:bg-[#FFFFFF1F] px-3 py-1.5 rounded-lg text-sm text-brand-green font-semibold min-w-[60px] justify-between shadow-sm border border-transparent dark:border-[#FFFFFF1F] hover:border-gray-200 transition-all cursor-pointer"
+              >
+                {entriesPerPage}
+                <ChevronDownIcon className="w-3 h-3 text-brand-green" />
+              </button>
+              {showEntriesDropdown && (
+                <div className="absolute top-full right-0 mt-1 w-20 bg-brand-light-secondary dark:bg-[#303438] border border-brand-light-tertiary dark:border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+                  {[10, 25, 50].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => {
+                        setEntriesPerPage(num);
+                        setShowEntriesDropdown(false);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full text-center py-1.5 text-sm hover:bg-black/5 dark:hover:bg-white/10 text-brand-text-light-primary dark:text-white cursor-pointer"
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <span className="text-sm text-[#19211C] dark:text-brand-text-secondary whitespace-nowrap font-[300]">
+              of {totalCount.toLocaleString()} entries
+            </span>
+          </div>
+
           <button
             onClick={() => {
               setSelectedUser(null);
               setView("form");
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-brand-green rounded-lg text-sm font-semibold text-white hover:bg-brand-green/90 transition-opacity shadow-lg shadow-brand-green/20"
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand-green rounded-lg text-sm font-semibold text-white hover:bg-brand-green/90 transition-opacity shadow-lg shadow-brand-green/20 cursor-pointer"
           >
             <span>Add New</span>
             <PlusIcon className="w-4 h-4" />
@@ -214,69 +250,89 @@ const CorporateManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Controls Bar 2 (Pagination info) */}
-      <div className="flex justify-end items-center gap-3 py-2 border-b border-brand-light-tertiary dark:border-brand-dark-tertiary pb-4">
-        <span className="text-sm text-brand-text-light-secondary dark:text-brand-text-secondary hidden sm:inline">
-          Showing
-        </span>
-        <div className="relative">
-          <button
-            onClick={() => setShowEntriesDropdown(!showEntriesDropdown)}
-            className="flex items-center gap-2 bg-brand-light-tertiary dark:bg-[#303438] px-3 py-1.5 rounded-lg text-sm text-brand-text-light-primary dark:text-white font-medium min-w-[60px] justify-between"
-          >
-            {entriesPerPage}
-            <ChevronDownIcon className="w-3 h-3 text-gray-500" />
-          </button>
-          {showEntriesDropdown && (
-            <div className="absolute top-full right-0 mt-1 w-20 bg-brand-light-secondary dark:bg-[#303438] border border-brand-light-tertiary dark:border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
-              {[10, 25, 50].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => {
-                    setEntriesPerPage(num);
-                    setShowEntriesDropdown(false);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full text-center py-1.5 text-sm hover:bg-black/5 dark:hover:bg-white/10 text-brand-text-light-primary dark:text-white"
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <span className="text-sm text-brand-text-light-secondary dark:text-brand-text-secondary whitespace-nowrap">
-          of {totalCount} entries
-        </span>
-
-        <div className="flex items-center gap-2 ml-2">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="w-8 h-8 rounded-full bg-brand-light-tertiary dark:bg-[#303438] flex items-center justify-center text-gray-400 hover:text-white disabled:opacity-50"
-          >
-            <ArrowLeftWithoutLineIcon className="w-3 h-3" />
-          </button>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center text-white shadow-lg disabled:opacity-50"
-          >
-            <ArrowRightWithoutLineIcon className="w-3 h-3" />
-          </button>
-        </div>
+      {/* Table */}
+      <div className="flex-1 min-h-[300px] relative flex flex-col">
+        <CorporateRegistrationTable
+          users={users}
+          loading={loading}
+          error={error}
+          onToggleStatus={handleToggleStatus}
+          onViewDetails={handleViewDetails}
+          onEdit={handleEdit}
+          onToggleBlock={handleToggleBlock}
+        />
       </div>
 
-      {/* Table */}
-      <CorporateRegistrationTable
-        users={users}
-        loading={loading}
-        error={error}
-        onToggleStatus={handleToggleStatus}
-        onViewDetails={handleViewDetails}
-        onEdit={handleEdit}
-        onToggleBlock={handleToggleBlock}
-      />
+      {/* Bottom pagination + footer */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-brand-text-light-secondary dark:text-brand-text-secondary pt-6 pb-2">
+        {/* Left: Links */}
+        <div className="flex gap-4 w-full sm:w-1/3 justify-center sm:justify-start order-2 sm:order-1">
+          <a
+            href="#"
+            className="text-brand-green hover:text-brand-green/80 transition-colors underline cursor-pointer"
+          >
+            Privacy Policy
+          </a>
+          <div className="h-4 w-px bg-brand-light-tertiary dark:bg-brand-dark-tertiary"></div>
+          <a
+            href="#"
+            className="text-brand-green hover:text-brand-green/80 transition-colors underline cursor-pointer"
+          >
+            Terms & Conditions
+          </a>
+        </div>
+
+        {/* Center: Pagination */}
+        <div className="flex justify-center w-full sm:w-1/3 order-1 sm:order-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="w-8 h-8 rounded-full bg-white dark:bg-[#FFFFFF1F] flex items-center justify-center text-[#19211C] dark:text-white hover:bg-gray-50 hover:border-gray-200 border border-transparent dark:border-[#FFFFFF1F] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <ArrowLeftWithoutLineIcon className="w-3 h-3" />
+            </button>
+
+            {/* Pagination Numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let page = i + 1;
+              if (totalPages > 5 && currentPage > 3) {
+                page = currentPage - 2 + i;
+              }
+              if (page > totalPages) return null;
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`min-w-[32px] h-8 px-1 rounded-md font-medium text-sm flex items-center justify-center transition-colors border cursor-pointer ${currentPage === page
+                    ? "bg-brand-green border-brand-green text-white shadow-lg shadow-brand-green/20"
+                    : "bg-transparent border-brand-light-tertiary dark:border-brand-dark-tertiary text-brand-text-light-primary dark:text-gray-400 hover:border-brand-text-light-secondary dark:hover:border-gray-500"
+                    }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center text-white shadow-lg shadow-brand-green/20 transition-colors hover:bg-brand-green/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <ArrowRightWithoutLineIcon className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Right: Copyright */}
+        <div className="text-center sm:text-right w-full sm:w-1/3 order-3 hidden sm:block font-medium text-[#19211C] dark:text-[#FFFFFF]">
+          &copy; {new Date().getFullYear()} Origin BI, Made with by{" "}
+          <span className="underline text-[#1ED36A] hover:text-[#1ED36A]/80 transition-colors cursor-pointer">
+            Touchmark Descience Pvt. Ltd.
+          </span>
+        </div>
+      </div>
     </div>
   );
 };

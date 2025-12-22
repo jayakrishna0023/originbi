@@ -57,7 +57,7 @@ const CorporateRegistrationTable: React.FC<RegistrationTableProps> = ({
 
       <table className="w-full min-w-[1000px] border-collapse">
         <thead>
-          <tr className="bg-brand-light-secondary dark:bg-[#1A1D21] text-left">
+          <tr className="bg-brand-light-secondary dark:bg-[#FFFFFF1F] text-left">
             <th className="p-4 text-xs font-semibold text-brand-text-light-secondary dark:text-brand-text-secondary uppercase tracking-wider cursor-pointer group">
               <div className="flex items-center gap-1">
                 Name
@@ -122,9 +122,9 @@ const CorporateRegistrationTable: React.FC<RegistrationTableProps> = ({
             users.map((user, index) => (
               <tr
                 key={user.id || index}
-                className={`hover:bg-brand-light-secondary dark:hover:bg-brand-dark-secondary/50 transition-colors ${index % 2 === 0
-                  ? "bg-brand-light-primary dark:bg-[#1A1D21]"
-                  : "bg-brand-light-secondary/30 dark:bg-[#1e2126]"
+                className={`hover:bg-brand-light-secondary dark:hover:bg-white/10 transition-colors ${index % 2 === 0
+                  ? "bg-brand-light-primary dark:bg-transparent"
+                  : "bg-brand-light-secondary/30 dark:bg-white/5"
                   }`}
               >
                 <td className="p-4">

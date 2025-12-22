@@ -31,7 +31,7 @@ const ProgramsTable: React.FC<ProgramsTableProps> = ({
 
             <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                 <table className="w-full border-collapse relative">
-                    <thead className="sticky top-0 z-20 bg-brand-light-secondary dark:bg-[#1A1D21] shadow-sm">
+                    <thead className="sticky top-0 z-20 bg-brand-light-secondary dark:bg-[#FFFFFF1F] shadow-sm">
                         <tr className="text-left">
                             <th className="p-4 text-xs font-semibold text-brand-text-light-secondary dark:text-brand-text-secondary uppercase tracking-wider">
                                 Code
