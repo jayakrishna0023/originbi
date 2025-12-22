@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
         onNavigate={handleNavigate}
         onLogout={handleLogout}
       />
-      <main className="p-6">
+      <main className="">
         <AdminDashboard />
       </main>
     </div>

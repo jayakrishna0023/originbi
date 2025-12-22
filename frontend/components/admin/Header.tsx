@@ -419,6 +419,31 @@ const Header: React.FC<HeaderProps> = ({
                                     </p>
                                     <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                                 </div>
+                                <div className="flex justify-between items-center px-2">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+                                        Language
+                                    </p>
+                                    <div className="flex bg-white dark:bg-brand-dark-tertiary rounded-lg p-1 border border-brand-light-tertiary dark:border-white/10">
+                                        <button
+                                            onClick={() => setLanguage("ENG")}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${language === "ENG"
+                                                ? "bg-brand-green text-white shadow-sm"
+                                                : "text-brand-text-light-secondary dark:text-brand-text-secondary hover:text-brand-text-primary dark:hover:text-white"
+                                                }`}
+                                        >
+                                            ENG
+                                        </button>
+                                        <button
+                                            onClick={() => setLanguage("TAM")}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${language === "TAM"
+                                                ? "bg-brand-green text-white shadow-sm"
+                                                : "text-brand-text-light-secondary dark:text-brand-text-secondary hover:text-brand-text-primary dark:hover:text-white"
+                                                }`}
+                                        >
+                                            TAM
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </nav>
                     </div>

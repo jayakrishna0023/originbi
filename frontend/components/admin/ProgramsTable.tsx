@@ -1,7 +1,7 @@
 import React from 'react';
 import { Program } from '@/lib/types';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
-import { EditIcon, DeleteIcon, SortIcon } from '@/components/icons';
+import { EditIcon, DeleteIcon, SortIcon, CheckIcon } from '@/components/icons';
 
 interface ProgramsTableProps {
     programs: Program[];
@@ -76,13 +76,11 @@ const ProgramsTable: React.FC<ProgramsTableProps> = ({
                                     </td>
                                     <td className="p-4 text-center align-middle">
                                         {program.is_demo ? (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                                Yes
-                                            </span>
+                                            <div className="flex justify-center">
+                                                <CheckIcon className="w-5 h-5 text-brand-green" />
+                                            </div>
                                         ) : (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
-                                                No
-                                            </span>
+                                            <span className="text-gray-300 dark:text-gray-600 font-medium">-</span>
                                         )}
                                     </td>
                                     <td className="p-4 text-sm text-brand-text-light-primary dark:text-white hidden md:table-cell align-middle">

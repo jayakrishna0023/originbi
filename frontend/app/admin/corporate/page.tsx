@@ -38,7 +38,7 @@ export default function CorporatePage() {
         onNavigate={handleNavigate}
         onLogout={handleLogout}
       />
-      <main className="p-6">
+      <main className="">
         <CorporateManagement />
       </main>
     </div>
