@@ -258,7 +258,7 @@ const ProgramsManagement: React.FC = () => {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 flex items-center justify-center text-[#19211C] dark:text-gray-400 hover:text-brand-green dark:hover:text-brand-green transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              className="p-2 flex items-center justify-center text-[#19211C] dark:text-white hover:text-brand-green dark:hover:text-brand-green transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
             >
               <ArrowLeftWithoutLineIcon className="w-4 h-4" />
             </button>
@@ -281,8 +281,8 @@ const ProgramsManagement: React.FC = () => {
                   key={page}
                   onClick={() => handlePageChange(page)}
                   className={`min-w-[32px] h-8 px-1 rounded-md font-medium text-sm flex items-center justify-center transition-all border cursor-pointer ${currentPage === page
-                      ? "bg-brand-green border-brand-green text-white shadow-md shadow-brand-green/20"
-                      : "bg-transparent border-brand-light-tertiary dark:border-white/10 text-brand-text-light-primary dark:text-gray-400 hover:border-brand-text-light-secondary dark:hover:border-gray-500 hover:bg-black/5 dark:hover:bg-white/5"
+                    ? "bg-brand-green border-brand-green text-white shadow-md shadow-brand-green/20"
+                    : "bg-transparent border-brand-light-tertiary dark:border-white/10 text-brand-text-light-primary dark:text-gray-400 hover:border-brand-text-light-secondary dark:hover:border-gray-500 hover:bg-black/5 dark:hover:bg-white/5"
                     }`}
                 >
                   {page}
@@ -293,7 +293,7 @@ const ProgramsManagement: React.FC = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-2 flex items-center justify-center text-[#19211C] dark:text-gray-400 hover:text-brand-green dark:hover:text-brand-green transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              className="p-2 flex items-center justify-center text-[#19211C] dark:text-white hover:text-brand-green dark:hover:text-brand-green transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
             >
               <ArrowRightWithoutLineIcon className="w-4 h-4" />
             </button>
