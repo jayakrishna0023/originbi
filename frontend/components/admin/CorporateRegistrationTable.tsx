@@ -1,7 +1,7 @@
 import React from "react";
 import { CorporateAccount } from "@/lib/types";
 import ToggleSwitch from "@/components/ui/ToggleSwitch";
-import { EyeVisibleIcon, SortIcon } from "@/components/icons";
+import { EyeVisibleIcon, SortIcon, EditIcon } from "@/components/icons";
 import { COUNTRY_CODES } from "@/lib/countryCodes";
 
 // Extend CorporateAccount to include user details if they are separate in types.ts
@@ -205,10 +205,10 @@ const CorporateRegistrationTable: React.FC<RegistrationTableProps> = ({
                       </button>
                       <button
                         onClick={() => onEdit && onEdit(user.id)}
-                        className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
+                        className="p-2 text-brand-green hover:bg-brand-green/10 rounded-lg transition-colors cursor-pointer"
                         title="Edit"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        <EditIcon className="w-4 h-4" />
                       </button>
 
                     </div>
