@@ -84,7 +84,7 @@ const AdminAuthLayout: React.FC<AdminAuthLayoutProps> = ({ children, heroTitle, 
                                     <span className="hidden sm:block w-px h-3 bg-gray-300 dark:bg-gray-700"></span>
                                     <a href="#" className="hover:text-brand-green transition-colors">Terms & Conditions</a>
                                 </div>
-                                <span className="text-brand-text-light-secondary dark:text-white">© 2025 Origin BI</span>
+                                <span className="text-brand-text-light-secondary dark:text-white">&copy; {new Date().getFullYear()} Origin BI</span>
                             </div>
                         </div>
                     </div>
