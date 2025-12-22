@@ -427,7 +427,7 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
                         e.target.value.replace(/\D/g, "")
                       )
                     }
-                    placeholder={currentProgramCode === "SCHOOL" ? "12" : "2025"}
+                    placeholder={currentProgramCode === "SCHOOL" ? "12" : "1"}
                     className={`${baseInputClasses} ${formErrors.current_year ? "border-red-500/50" : ""
                       }`}
                   />
