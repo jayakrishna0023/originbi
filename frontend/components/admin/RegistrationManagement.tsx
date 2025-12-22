@@ -515,7 +515,7 @@ const RegistrationManagement: React.FC = () => {
 
         {/* Right: Copyright */}
         <div className="text-center sm:text-right w-full sm:w-1/3 order-3 hidden sm:block font-medium text-[#19211C] dark:text-[#FFFFFF]">
-          &copy; 2025 Origin BI, Made with by{" "}
+          &copy; {new Date().getFullYear()} Origin BI, Made with by{" "}
           <span className="underline text-[#1ED36A] hover:text-[#1ED36A]/80 transition-colors cursor-pointer">
             Touchmark Descience Pvt. Ltd.
           </span>

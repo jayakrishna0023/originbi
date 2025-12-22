@@ -64,7 +64,7 @@ const CorporateLogin: React.FC<CorporateLoginProps> = ({
               <span className="border-r border-brand-light-tertiary dark:border-white/20 h-3 hidden sm:block"></span>
               <a href="#" className="hover:text-brand-green/80 transition-colors text-right underline decoration-solid decoration-0 underline-offset-2">Terms & Conditions</a>
             </div>
-            <span className="opacity-100 text-brand-text-light-secondary dark:text-white">&copy; OriginBI 2025</span>
+            <span className="opacity-100 text-brand-text-light-secondary dark:text-white">&copy; OriginBI {new Date().getFullYear()}</span>
           </footer>
         </div>
 
