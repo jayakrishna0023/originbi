@@ -1,51 +1,57 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CheckCircleIcon, StepperUpArrowIcon, StepperDownArrowIcon, StepperPendingDotIcon, CheckIcon } from '@/components/icons';
+import { useLanguage } from "@/contexts/LanguageContext";
 
-// --- Interfaces & Mock Data ---
+// --- Interfaces ---
 
 interface APIOption {
   id: string;
-  option_text: string;
+  option_text: string; // fallback
+  option_text_en?: string;
+  option_text_ta?: string;
   is_correct?: boolean;
 }
 
 interface APIQuestion {
   id: string;
-  question: string;
+  question: string; // fallback
+  question_text_en?: string;
+  question_text_ta?: string;
+  context_text_en?: string;
+  context_text_ta?: string;
   options?: APIOption[];
   images?: { image_url: string }[];
 }
 
 interface APIAssessmentAnswer {
-  id: string; // The answer record ID (used as question context in frontend loop)
+  id: string;
   main_question?: APIQuestion;
   open_question?: APIQuestion;
-  // We will map main_question or open_question to the frontend Question model
 }
 
 interface Option {
   id: string;
-  text: string;
+  textEn: string;
+  textTa?: string;
 }
 
 interface Question {
-  id: string; // Changed from number to string to match UUID
-  preamble?: string; // Backend might not have preamble in basic struct, leaving optional
-  text: string;
+  id: string;
+  contextTextEn?: string;
+  contextTextTa?: string;
+  textEn: string;
+  textTa?: string;
   options: Option[];
-  assessmentAnswerId: string; // To link back to the answer record for submission
+  assessmentAnswerId: string;
 }
 
 interface AssessmentRunnerProps {
   onBack: () => void;
   onGoToDashboard?: () => void;
-  attemptId?: string; // Optional for now
+  attemptId?: string;
 }
-
-// State management is now inside the component
-
 
 // --- Success Modal Component ---
 const SuccessModal: React.FC<{
@@ -88,7 +94,6 @@ const SuccessModal: React.FC<{
 );
 
 // --- VerticalStepper Component ---
-
 const VerticalStepper: React.FC<{
   currentStep: number;
   totalSteps: number;
@@ -188,7 +193,6 @@ const VerticalStepper: React.FC<{
 };
 
 // --- CircularProgress Component ---
-
 const CircularProgress: React.FC<{
   current: number;
   total: number;
@@ -264,13 +268,10 @@ const CircularProgress: React.FC<{
   };
 
 // --- AssessmentRunner Component ---
-
-// --- AssessmentRunner Component ---
-
 const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   onBack,
   onGoToDashboard,
-  attemptId = "dummy-attempt-id", // Default for dev
+  attemptId = "dummy-attempt-id",
 }) => {
   // State
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -280,42 +281,38 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [changeCount, setChangeCount] = useState(0); // Track answer changes
+  const [changeCount, setChangeCount] = useState(0);
+
+  // Language Context
+  const { language } = useLanguage();
 
   // Refs for logic
-  const startTimeRef = React.useRef<number>(Date.now());
-  const initialLoadRef = React.useRef(false);
+  const startTimeRef = useRef<number>(Date.now());
+  const initialLoadRef = useRef(false);
 
   // Fetch Questions
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialLoadRef.current) return;
     initialLoadRef.current = true;
 
     const fetchQuestions = async () => {
-      console.log(`[AssessmentRunner] Fetching questions for attempt: ${attemptId} from http://localhost:4005/api/v1/exam/start`);
-      // Update logic to try finding a non-dummy ID if possible or just proceed
+      console.log(`[AssessmentRunner] Fetching questions for attempt: ${attemptId}`);
       try {
         const response = await fetch("http://localhost:4005/api/v1/exam/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            student_id: "dummy-student-id", // Ideally from auth context
+            student_id: "dummy-student-id",
             exam_id: attemptId,
           }),
         });
 
-        console.log(`[AssessmentRunner] Response status: ${response.status}`);
-
         if (!response.ok) {
-          const body = await response.text();
-          console.error(`[AssessmentRunner] Error body: ${body}`);
           throw new Error(`Failed to load assessment. Status: ${response.status}`);
         }
 
         const data = await response.json();
         const apiAnswers: APIAssessmentAnswer[] = data.data || [];
-
-        console.log(`[AssessmentRunner] Loaded ${apiAnswers.length} questions`);
 
         if (apiAnswers.length === 0) {
           throw new Error("No questions returned from the server.");
@@ -324,25 +321,33 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
         // Map API response to UI Question format
         const mappedQuestions: Question[] = apiAnswers.map((ans) => {
           const qData = ans.main_question || ans.open_question;
-          // Handle case where question might be missing (shouldn't happen in valid data)
+          // Handle case where question might be missing
           if (!qData) {
-            return { id: ans.id, text: "Error loading question", options: [], assessmentAnswerId: ans.id };
+            return {
+              id: ans.id,
+              textEn: "Error loading question",
+              options: [],
+              assessmentAnswerId: ans.id
+            };
           }
           return {
             id: qData.id,
-            text: qData.question,
+            textEn: qData.question_text_en || qData.question,
+            textTa: qData.question_text_ta,
+            contextTextEn: qData.context_text_en,
+            contextTextTa: qData.context_text_ta,
             options: qData.options?.map((opt) => ({
               id: opt.id,
-              text: opt.option_text,
+              textEn: opt.option_text_en || opt.option_text,
+              textTa: opt.option_text_ta,
             })) || [],
-            assessmentAnswerId: ans.id, // Important: use the Answer Record ID for submission context
-            preamble: undefined, // Backend doesn't support preamble yet
+            assessmentAnswerId: ans.id,
           };
         });
 
         setQuestions(mappedQuestions);
         setLoading(false);
-        startTimeRef.current = Date.now(); // Reset timer for first question
+        startTimeRef.current = Date.now();
       } catch (err: any) {
         console.error("[AssessmentRunner] error:", err);
         setError(err.message || "Something went wrong");
@@ -356,6 +361,14 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   const currentQuestion = questions[currentQIndex];
   const totalQuestions = questions.length;
   const currentNumber = currentQIndex + 1;
+
+  // Derive Display Text based on Language
+  const getDisplayText = (enText: string, taText?: string) => {
+    return language === "TAM" && taText ? taText : enText;
+  };
+
+  const displayQuestionText = currentQuestion ? getDisplayText(currentQuestion.textEn, currentQuestion.textTa) : "";
+  const displayContextText = currentQuestion ? (language === "TAM" && currentQuestion.contextTextTa ? currentQuestion.contextTextTa : currentQuestion.contextTextEn) : null;
 
   // Handle Option Select
   const handleOptionSelect = (id: string) => {
@@ -371,20 +384,15 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
 
     const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
-    // Prepare payload
     const payload = {
       attempt_id: attemptId,
-      question_id: currentQuestion.assessmentAnswerId, // Using the answer record ID
+      question_id: currentQuestion.id,
       selected_option: selectedOption,
       time_taken: timeSpent,
       answer_change_count: changeCount,
-      // Add other flags here if available in frontend state (distraction, attention, etc)
     };
 
     try {
-      // Fire and forget, or await? User said "answer text also want to store".
-      // Usually better to await to ensure data integrity, but for smooth UI maybe non-blocking?
-      // Let's await to be safe.
       await fetch("http://localhost:4005/api/v1/exam/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -394,22 +402,20 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
       if (currentNumber < totalQuestions) {
         setCurrentQIndex((prev) => prev + 1);
         setSelectedOption(null);
-        setChangeCount(0); // Reset for next question
-        startTimeRef.current = Date.now(); // Reset timer
+        setChangeCount(0);
+        startTimeRef.current = Date.now();
       } else {
         setIsCompleted(true);
       }
     } catch (err) {
       console.error("Failed to submit answer:", err);
-      // Determine UX: Block user or retry? For now, alert or just log.
-      alert("Failed to save answer. Please try again.");
     }
   };
 
   const handlePrevious = () => {
     if (currentNumber > 1) {
       setCurrentQIndex((prev) => prev - 1);
-      setSelectedOption(null); // Assuming we don't restore previous state for now (user didn't ask for review mode)
+      setSelectedOption(null);
       setChangeCount(0);
       startTimeRef.current = Date.now();
     } else {
@@ -475,15 +481,18 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
             <div className="flex flex-col w-full">
 
               {/* Text Section - Aligned with designs */}
-              <div className="mb-4 lg:mb-6 animate-fade-in relative flex flex-row justify-between items-start gap-4">
+              <div className="mb-4 lg:mb-6 animate-fade-in relative flex flex-col justify-start items-start gap-4">
                 <div className="flex-grow">
-                  {currentQuestion.preamble && (
-                    <p className="text-[clamp(14px,1.2vw,22px)] text-gray-700 dark:text-white mb-1 lg:mb-2 font-normal leading-relaxed">
-                      {currentQuestion.preamble}
+                  {/* Context Text Display */}
+                  {displayContextText && (
+                    <p className="text-[clamp(14px,1.2vw,22px)] text-gray-700 dark:text-gray-300 mb-3 lg:mb-4 font-normal leading-relaxed">
+                      {displayContextText}
                     </p>
                   )}
+
+                  {/* Question Text Display */}
                   <h1 className="text-[clamp(18px,2vw,32px)] font-semibold text-brand-text-light-primary dark:text-white leading-tight">
-                    {currentQuestion.text}
+                    {displayQuestionText}
                   </h1>
                 </div>
               </div>
@@ -495,6 +504,8 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
               >
                 {currentQuestion.options.map((option) => {
                   const isSelected = selectedOption === option.id;
+                  const optionLabel = getDisplayText(option.textEn, option.textTa);
+
                   return (
                     <button
                       key={option.id}
@@ -521,7 +532,7 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
                           : "text-brand-text-light-primary dark:text-gray-100"
                           }`}
                       >
-                        {option.text}
+                        {optionLabel}
                       </span>
                     </button>
                   );

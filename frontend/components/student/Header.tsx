@@ -106,6 +106,8 @@ const NotificationItem: React.FC<{
     </div>
 );
 
+import { useLanguage, Language } from "@/contexts/LanguageContext";
+
 const Header: React.FC<HeaderProps> = ({
     onLogout,
     currentView,
@@ -114,11 +116,12 @@ const Header: React.FC<HeaderProps> = ({
     showAssessmentOnly = false,
 }) => {
     const { theme, toggleTheme } = useTheme();
+    const { language, setLanguage } = useLanguage();
     const [isProfileOpen, setProfileOpen] = useState(false);
     const [isLangOpen, setLangOpen] = useState(false);
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isNotificationsOpen, setNotificationsOpen] = useState(false);
-    const [language, setLanguage] = useState("ENG");
+    // const [language, setLanguage] = useState("ENG"); // Removed
     const [hasNotification, setHasNotification] = useState(true);
 
     const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -175,7 +178,7 @@ const Header: React.FC<HeaderProps> = ({
         return () => { document.removeEventListener("mousedown", handleClickOutside); };
     }, [isMobileMenuOpen]);
 
-    const handleLangChange = (lang: string) => { setLanguage(lang); setLangOpen(false); };
+    const handleLangChange = (lang: Language) => { setLanguage(lang); setLangOpen(false); };
     const handleNotificationClick = () => { setNotificationsOpen((p) => !p); if (hasNotification) setHasNotification(false); };
 
     const handleNavClick = (view: "dashboard" | "assessment") => {
