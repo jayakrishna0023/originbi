@@ -649,6 +649,7 @@ export class CorporateService {
             region: process.env.AWS_REGION,
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const transporter = nodemailer.createTransport({
             SES: ses, // Uppercase SES for Nodemailer v6
         } as any);

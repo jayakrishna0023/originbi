@@ -22,7 +22,6 @@ import { getStudentWelcomeEmailTemplate } from '../mail/templates/student-welcom
 
 import * as nodemailer from 'nodemailer';
 import { SES } from 'aws-sdk';
-import * as path from 'path';
 
 @Injectable()
 export class RegistrationsService {
@@ -226,7 +225,6 @@ export class RegistrationsService {
       // Check based on new schema: Filter by programId and isMandatory
       const levels = await manager.getRepository(AssessmentLevel).find({
         where: {
-          programId: programId, // Filter by the program we selected!
           isMandatory: true,
         },
       });
