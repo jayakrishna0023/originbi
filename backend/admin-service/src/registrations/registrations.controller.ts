@@ -32,8 +32,8 @@ export class RegistrationsController {
 
   @Post('bulk/preview')
   @UseInterceptors(FileInterceptor('file'))
-  async bulkPreview(@UploadedFile() file: any) {
-    if (!file) {
+  async bulkPreview(@UploadedFile() file: Express.Multer.File) {
+    if (!file || !file.buffer) {
       throw new BadRequestException('File is required');
     }
     // Hardcoded adminId = 1 as per existing pattern
@@ -42,7 +42,7 @@ export class RegistrationsController {
   }
 
   @Post('bulk/execute')
-  async bulkExecute(@Body() body: { import_id: string; overrides?: any[] }) {
+  async bulkExecute(@Body() body: { import_id: string; overrides?: Record<string, any>[] }) {
     return this.bulkRegistrationsService.execute(body);
   }
 

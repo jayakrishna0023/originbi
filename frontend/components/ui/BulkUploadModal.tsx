@@ -109,5 +109,5 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onSu
     );
 };
 
-export default BulkUploadIcon; // Re-exporting icon just in case of dependency mix-up, but mainly export modal
+export default BulkUploadModal;
 export { BulkUploadModal };

@@ -205,6 +205,15 @@ export const registrationService = {
     return res.json();
   },
 
+  // 🔹 BULK UPLOAD (Direct: Preview + Execute)
+  async bulkUpload(file: File): Promise<any> {
+    const previewData = await this.bulkPreview(file);
+    if (!previewData.importId) {
+      throw new Error("Failed to initialize bulk import");
+    }
+    return this.bulkExecute(previewData.importId, []);
+  },
+
   // 🔹 BULK EXECUTE
   async bulkExecute(importId: string, overrides: any[] = []): Promise<any> {
     const token = AuthService.getToken();
