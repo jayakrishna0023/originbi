@@ -1,6 +1,7 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, In } from 'typeorm';
+import { Repository, DataSource, In, LessThan } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const csv = require('fast-csv');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -322,6 +323,39 @@ export class BulkRegistrationsService {
         job.completedAt = new Date();
         await this.bulkImportRepo.save(job);
         this.logger.log(`Job ${jobId} Completed. Success: ${successCount}, Fail: ${failCount}`);
+    }
+
+    // ---------------------------------------------------------
+    // CRON JOBS
+    // ---------------------------------------------------------
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    async cleanupDrafts() {
+        this.logger.log('Running cleanupDrafts...');
+        const retentionDate = new Date();
+        retentionDate.setDate(retentionDate.getDate() - 7);
+
+        // Delete DRAFTs older than 7 days
+        // Note: Cascade delete should handle rows if configured, otherwise we delete rows first.
+        // Assuming TypeORM cascade or database constraints handle it. 
+        // If not, we should query IDs first, delete rows, then delete job.
+        // Safe approach: Fetch first.
+
+        const oldDrafts = await this.bulkImportRepo.find({
+            where: {
+                status: 'DRAFT',
+                createdAt: LessThan(retentionDate)
+            },
+            select: ['id']
+        });
+
+        if (oldDrafts.length > 0) {
+            const ids = oldDrafts.map(j => j.id);
+            // Delete rows
+            await this.bulkImportRowRepo.delete({ importId: In(ids) });
+            // Delete jobs
+            const res = await this.bulkImportRepo.delete({ id: In(ids) });
+            this.logger.log(`Deleted ${res.affected} old DRAFT bulk imports.`);
+        }
     }
 
     private mapRowToDto(
