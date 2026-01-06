@@ -40,6 +40,11 @@ export class BulkRegistrationsService {
      * Phase 1: Preview & Validate
      */
     async preview(fileBuffer: Buffer, filename: string, userId: number) {
+        // Validate File Format
+        if (!filename.toLowerCase().endsWith('.csv')) {
+            throw new BadRequestException('Invalid file format. Only CSV files are allowed.');
+        }
+
         // 1. Create Import Record
         const importJob = this.bulkImportRepo.create({
             createdById: userId,
@@ -56,6 +61,13 @@ export class BulkRegistrationsService {
         allPrograms.forEach(p => {
             programMap.set(this.normalizeString(p.code), p);
             programMap.set(this.normalizeString(p.name), p);
+        });
+
+        // Fetch Groups for Matching
+        const allGroups = await this.groupsRepo.find();
+        const groupMap = new Map<string, Groups>();
+        allGroups.forEach(g => {
+            groupMap.set(this.normalizeString(g.name), g);
         });
 
         const allDepartments = await this.departmentRepo.find();
@@ -87,31 +99,61 @@ export class BulkRegistrationsService {
                 .on('end', () => resolve(true));
         });
 
-        // 4. Batch Validation Checks
+        // 4. Batch Validation Checks (Enhanced for Existing Users)
         const emails = rawRows.map(r => r['Email'] || r['email']).filter(Boolean);
         const mobiles = rawRows.map(r => r['Mobile'] || r['mobile'] || r['mobile_number']).filter(Boolean);
 
-        const existingUsers = await this.userRepo.find({
-            where: { email: In(emails) }, // Simple In clause
-            select: ['email', 'metadata']
-        });
-        const existingEmails = new Set(existingUsers.map(u => u.email));
+        // Fetch users by Email OR Mobile
+        let existingUsers: User[] = [];
 
-        const existingMobiles = new Set<string>();
+        if (emails.length > 0 || mobiles.length > 0) {
+            const qb = this.userRepo.createQueryBuilder('u')
+                .select(['u.id', 'u.email', 'u.metadata']);
+
+            if (emails.length > 0) {
+                qb.where('u.email IN (:...emails)', { emails });
+            }
+            if (mobiles.length > 0) {
+                // If emails exist, use OR, otherwise just WHERE
+                if (emails.length > 0) {
+                    qb.orWhere("u.metadata->>'mobile' IN (:...mobiles)", { mobiles });
+                } else {
+                    qb.where("u.metadata->>'mobile' IN (:...mobiles)", { mobiles });
+                }
+            }
+            existingUsers = await qb.getMany();
+        }
+
+        // Build User Maps
+        const userMapByEmail = new Map<string, User>();
+        const userMapByMobile = new Map<string, User>();
+
         existingUsers.forEach(u => {
-            if (u.metadata?.mobile) existingMobiles.add(u.metadata.mobile);
+            if (u.email) userMapByEmail.set(u.email, u); // Email is unique
+            const m = u.metadata?.mobile;
+            if (m) userMapByMobile.set(String(m).trim(), u);
         });
 
-        if (mobiles.length > 0) {
-            const mobileUsers = await this.userRepo
-                .createQueryBuilder('u')
-                .where("u.metadata->>'mobile' IN (:...mobiles)", { mobiles })
-                .getMany();
-
-            mobileUsers.forEach(u => {
-                if (u.metadata?.mobile) existingMobiles.add(u.metadata.mobile);
-                if (u.email) existingEmails.add(u.email);
-            });
+        // Fetch Assessment Sessions for these existing users to check overlaps
+        // Map: userId -> AssessmentSession[]
+        const userAssessmentMap = new Map<number, any[]>();
+        if (existingUsers.length > 0) {
+            const userIds = existingUsers.map(u => u.id);
+            try {
+                // We use raw query or partial select for performance
+                const sessions = await this.dataSource.query(
+                    `SELECT id, user_id, valid_from, valid_to, program_id, status FROM assessment_sessions WHERE user_id IN (${userIds.join(',')})`
+                );
+                sessions.forEach((s: any) => {
+                    const uid = Number(s.user_id);
+                    if (!userAssessmentMap.has(uid)) {
+                        userAssessmentMap.set(uid, []);
+                    }
+                    userAssessmentMap.get(uid)?.push(s);
+                });
+            } catch (err) {
+                this.logger.warn('Failed to fetch existing sessions for validation', err);
+            }
         }
 
         // 5. Process Rows
@@ -134,8 +176,11 @@ export class BulkRegistrationsService {
                 programMap,
                 deptMap,
                 degreeMap,
-                existingEmails,
-                existingMobiles,
+                allGroups,
+                groupMap, // Pass group map
+                userMapByEmail,
+                userMapByMobile,
+                userAssessmentMap,
                 seenEmails,
                 seenMobiles
             );
@@ -288,7 +333,7 @@ export class BulkRegistrationsService {
 
                 const dto = this.mapRowToDto(row.rawData, effectiveGroupName, programMap, deptMap, degreeMap);
 
-                // Check redundancy
+                // Check Redundancy
                 const existingUser = await this.userRepo.findOne({ where: { email: dto.email } });
 
                 if (existingUser) {
@@ -333,12 +378,6 @@ export class BulkRegistrationsService {
         const retentionDate = new Date();
         retentionDate.setDate(retentionDate.getDate() - 7);
 
-        // Delete DRAFTs older than 7 days
-        // Note: Cascade delete should handle rows if configured, otherwise we delete rows first.
-        // Assuming TypeORM cascade or database constraints handle it. 
-        // If not, we should query IDs first, delete rows, then delete job.
-        // Safe approach: Fetch first.
-
         const oldDrafts = await this.bulkImportRepo.find({
             where: {
                 status: 'DRAFT',
@@ -377,8 +416,6 @@ export class BulkRegistrationsService {
                 if (val.length === 0) continue;
                 return val.map(v => (v === undefined || v === null) ? '' : String(v)).join(', ');
             }
-
-            // Skip objects to avoid "[object Object]"
         }
         return undefined;
     }
@@ -416,7 +453,11 @@ export class BulkRegistrationsService {
             name: this.getValue(rawData, ['FullName', 'Name', 'full_name']) || '',
             email: this.getValue(rawData, ['Email', 'email']) || '',
             mobile: this.getValue(rawData, ['Mobile', 'mobile', 'mobile_number']) || '',
-            countryCode: this.getValue(rawData, ['CountryCode', 'country_code']) || '+91',
+            countryCode: (() => {
+                let cc = this.getValue(rawData, ['CountryCode', 'country_code']) || '+91';
+                if (!cc.startsWith('+')) cc = '+' + cc;
+                return cc;
+            })(),
             gender: (this.getValue(rawData, ['Gender', 'gender']) || 'FEMALE').toUpperCase(),
 
             programType: pId,
@@ -443,8 +484,11 @@ export class BulkRegistrationsService {
         programMap: Map<string, Program>,
         deptMap: Map<string, Department>,
         degreeMap: Map<string, any>,
-        existingEmails: Set<string>,
-        existingMobiles: Set<string>,
+        allGroups: Groups[],
+        groupMap: Map<string, Groups>,
+        userMapByEmail: Map<string, User>,
+        userMapByMobile: Map<string, User>,
+        userAssessmentMap: Map<number, any[]>,
         seenEmails: Set<string>,
         seenMobiles: Set<string>
     ): BulkImportRow {
@@ -459,8 +503,9 @@ export class BulkRegistrationsService {
             programMap,
             deptMap,
             degreeMap,
-            existingEmails,
-            existingMobiles,
+            userMapByEmail,
+            userMapByMobile,
+            userAssessmentMap,
             seenEmails,
             seenMobiles
         );
@@ -471,6 +516,7 @@ export class BulkRegistrationsService {
             return rowEntity;
         }
 
+        // Group Matching Logic
         const groupNameInput = rawData['GroupName'] || rawData['group_name'];
         if (!groupNameInput) {
             rowEntity.status = 'INVALID';
@@ -478,9 +524,48 @@ export class BulkRegistrationsService {
             return rowEntity;
         }
 
-        rowEntity.status = 'READY';
+        rowEntity.status = 'READY'; // Default to READY (New Group)
         rowEntity.matchedGroupId = null;
         rowEntity.groupMatchScore = 0;
+
+        const normalizedInput = this.normalizeString(groupNameInput);
+
+        // 1. Exact Match
+        if (groupMap.has(normalizedInput)) {
+            const g = groupMap.get(normalizedInput);
+            rowEntity.matchedGroupId = Number(g!.id);
+            rowEntity.groupMatchScore = 100;
+            // Status remains READY (Exact match is good to go)
+        } else {
+            // 2. Fuzzy Match
+            // Find closest group
+            let bestMatch: Groups | null = null;
+            let minDistance = Infinity;
+
+            for (const g of allGroups) {
+                // Optimization: Skip if length difference is too big
+                if (Math.abs(g.name.length - groupNameInput.length) > 3) continue;
+
+                const dist = this.levenshtein(groupNameInput.toLowerCase(), g.name.toLowerCase());
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestMatch = g;
+                }
+            }
+
+            // Thresholds: Distance <= 2 usually implies typo (School A vs SchoolA or Schol A)
+            if (bestMatch && minDistance <= 2) {
+                rowEntity.matchedGroupId = Number(bestMatch.id);
+                // Calculate rough score
+                const len = Math.max(groupNameInput.length, bestMatch.name.length);
+                const score = Math.round((1 - minDistance / len) * 100);
+                rowEntity.groupMatchScore = score;
+
+                // Mark for Confirmation
+                rowEntity.status = 'NEEDS_CONFIRMATION';
+            }
+            // 3. Else: No Match found -> New Group (Status READY, matchId null)
+        }
 
         return rowEntity;
     }
@@ -490,19 +575,33 @@ export class BulkRegistrationsService {
         programMap: Map<string, Program>,
         deptMap: Map<string, Department>,
         degreeMap: Map<string, any>,
-        existingEmails: Set<string>,
-        existingMobiles: Set<string>,
+        userMapByEmail: Map<string, User>,
+        userMapByMobile: Map<string, User>,
+        userAssessmentMap: Map<number, any[]>,
         seenEmails: Set<string>,
         seenMobiles: Set<string>
     ): string | null {
         // 1. Mandatory Fields
         const email = row['Email'] || row['email'];
         const mobile = row['Mobile'] || row['mobile'] || row['mobile_number'];
+        let countryCode = row['CountryCode'] || row['country_code'] || '+91';
         const programCode = row['ProgramId'] || row['program_code'];
         const gender = (row['Gender'] || row['gender'] || '').toUpperCase();
 
         if (!email) return "Email is required";
         if (!mobile) return "Mobile is required";
+
+        // Country Code Normalization (Auto-add +)
+        if (!countryCode.startsWith('+')) {
+            countryCode = '+' + countryCode;
+            // Update row so it reflects in data that might be used later or shown in UI if rawData is used?
+            // Note: rawData is usually read-only or reference. 
+            // Better to just validate the normalized version.
+        }
+        // Ensure it is valid (e.g. +91, +1)
+        if (!/^\+\d{1,4}$/.test(countryCode)) {
+            return `Country Code '${countryCode}' invalid. Must be + followed by digits (e.g. +91)`;
+        }
 
         // 2. Gender
         if (!['MALE', 'FEMALE', 'OTHER', 'OTHERS'].includes(gender)) {
@@ -553,19 +652,152 @@ export class BulkRegistrationsService {
         const end = row['ExamEnd'] || row['exam_end_date'];
         if (!start || !end) return "Exam Start/End dates are required";
 
-        // 5. Duplication
-        if (existingEmails.has(email)) return `Email ${email} already exists`;
-        if (existingMobiles.has(mobile)) return `Mobile ${mobile} already exists`;
-        if (seenEmails.has(email)) return `Duplicate Email in file: ${email}`;
-        if (seenMobiles.has(mobile)) return `Duplicate Mobile in file: ${mobile}`;
+        // Parse using custom helper to support DD-MM-YYYY
+        const startDate = this.parseDateTime(start);
+        const endDate = this.parseDateTime(end);
+        const now = new Date();
 
-        seenEmails.add(email);
-        seenMobiles.add(mobile);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return "Invalid Date Format. Please use 'DD-MM-YYYY HH:mm' (e.g., 10-01-2026 09:00)";
+        }
+
+        // Logic: Exam Start >= Now (approx)
+        if (startDate < now) {
+            return "Exam Start Date & Time must be greater than or equal to current time.";
+        }
+
+        // Logic: Exam End > Exam Start
+        if (endDate <= startDate) {
+            return "Exam End Date & Time must be greater than Start Date & Time.";
+        }
+
+        // 5. Duplication Check (Existing Users)
+        const normalizeMobile = (m: any) => String(m).trim();
+        const inputMobile = normalizeMobile(mobile);
+
+        const existingByEmail = userMapByEmail.get(email);
+        const existingByMobile = userMapByMobile.get(inputMobile);
+
+        // Case: User Exists by Email
+        if (existingByEmail) {
+            const dbMobile = normalizeMobile(existingByEmail.metadata?.mobile || '');
+            if (dbMobile !== inputMobile) {
+                return `Error: Email ${email} already exists with different phone no`;
+            }
+        }
+
+        // Case: User Exists by Mobile
+        if (existingByMobile) {
+            const dbEmail = existingByMobile.email;
+            if (dbEmail !== email) {
+                return `Error: Mobile no ${mobile} already exists with different email id`;
+            }
+        }
+
+        // If both exist and match, or one exists and matches -> Existing User
+        const finalExistingUser = existingByEmail; // We know they match if we are here and one exists
+
+        // If Existing User, Check Active Assessment
+        if (finalExistingUser) {
+            const sessions = userAssessmentMap.get(Number(finalExistingUser.id)) || [];
+
+            // Check if ANY active assessment exists
+            // We consider an assessment "Active" if it is NOT in a terminal state (COMPLETED or EXPIRED).
+            // This includes: NOT_STARTED, ON_GOING, PARTIALLY_EXP (if used).
+            const activeSession = sessions.find(s =>
+                s.status !== 'COMPLETED' &&
+                s.status !== 'EXPIRED'
+            );
+
+            if (activeSession) {
+                return `Error: User already has an active assessment (Status: ${activeSession.status}). Cannot create a new one.`;
+            }
+        } else {
+            // New User -> Check Duplicates within the file itself
+            if (seenEmails.has(email)) return `Duplicate Email in file: ${email}`;
+            if (seenMobiles.has(mobile)) return `Duplicate Mobile in file: ${mobile}`;
+
+            seenEmails.add(email);
+            seenMobiles.add(mobile);
+        }
 
         return null;
     }
 
     private normalizeString(str: string): string {
         return str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+    }
+
+    /**
+     * Helper to parse dates supporting DD-MM-YYYY or DD/MM/YYYY formats
+     */
+    private parseDateTime(val: any): Date {
+        if (!val) return new Date('Invalid');
+        const str = String(val).trim();
+
+        // 1. Try generic ISO (YYYY-MM-DD)
+        // If it starts with YYYY (4 digits), assume built-in parser is fine
+        if (/^\d{4}/.test(str)) {
+            return new Date(str);
+        }
+
+        // 2. Regex for DD-MM-YYYY or DD/MM/YYYY with optional time
+        // Matches: 10-01-2026, 10/01/2026, 10-01-2026 09:00
+        const dmyPattern = /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/;
+
+        const match = str.match(dmyPattern);
+        if (match) {
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1; // Month is 0-indexed
+            const year = parseInt(match[3], 10);
+            const hour = match[4] ? parseInt(match[4], 10) : 0;
+            const minute = match[5] ? parseInt(match[5], 10) : 0;
+            const second = match[6] ? parseInt(match[6], 10) : 0;
+            return new Date(year, month, day, hour, minute, second);
+        }
+
+        // 3. Fallback to standard
+        return new Date(str);
+    }
+
+    /**
+     * Levenshtein Distance Calculation for Fuzzy Matching
+     */
+    private levenshtein(a: string, b: string): number {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+
+        const matrix: number[][] = [];
+
+        // increment along the first column of each row
+        let i;
+        for (i = 0; i <= b.length; i++) {
+            matrix[i] = [i];
+        }
+
+        // increment each column in the first row
+        let j;
+        for (j = 0; j <= a.length; j++) {
+            matrix[0][j] = j;
+        }
+
+        // Fill in the rest of the matrix
+        for (i = 1; i <= b.length; i++) {
+            for (j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        Math.min(
+                            matrix[i][j - 1] + 1, // insertion
+                            matrix[i - 1][j] + 1, // deletion
+                        ),
+                    );
+                }
+            }
+        }
+
+        return matrix[b.length][a.length];
     }
 }
