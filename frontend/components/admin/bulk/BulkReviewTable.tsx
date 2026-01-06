@@ -25,7 +25,7 @@ export const BulkReviewTable: React.FC<BulkReviewTableProps> = ({ validRows, inv
         onConfirm(overrideArray);
     };
 
-    const renderCell = (row: any, keys: string[]) => {
+    const renderCell = (row: any, keys: string[], formatter?: (val: any) => any) => {
         let val: any = '-';
         for (const k of keys) {
             if (row.rawData[k] !== undefined && row.rawData[k] !== null && row.rawData[k] !== '') {
@@ -35,6 +35,10 @@ export const BulkReviewTable: React.FC<BulkReviewTableProps> = ({ validRows, inv
         }
 
         if (val === '-') return '-';
+
+        if (formatter) {
+            val = formatter(val);
+        }
 
         const isErrorSource = row.status === 'INVALID' && row.errorMessage && String(row.errorMessage).includes(String(val));
 
@@ -83,7 +87,9 @@ export const BulkReviewTable: React.FC<BulkReviewTableProps> = ({ validRows, inv
                                     <td className="px-4 py-3 font-medium text-white">{renderCell(row, ['FullName', 'Name', 'full_name', 'name'])}</td>
                                     <td className="px-4 py-3">{renderCell(row, ['Gender', 'gender'])}</td>
                                     <td className="px-4 py-3">{renderCell(row, ['Email', 'email'])}</td>
-                                    <td className="px-4 py-3">{renderCell(row, ['Mobile', 'mobile', 'mobile_number'])}</td>
+                                    <td className="px-4 py-3">
+                                        {renderCell(row, ['CountryCode', 'country_code'], (val) => String(val).startsWith('+') ? val : '+' + val)} {renderCell(row, ['Mobile', 'mobile', 'mobile_number'])}
+                                    </td>
                                     <td className="px-4 py-3">{renderCell(row, ['ProgramId', 'program_code'])}</td>
                                     <td className="px-4 py-3">
                                         {renderCell(row, ['GroupName', 'group_name'])}
@@ -163,7 +169,33 @@ export const BulkReviewTable: React.FC<BulkReviewTableProps> = ({ validRows, inv
                     </h4>
 
                     <div className="mt-4 flex justify-end">
-                        <button className="text-xs flex items-center gap-1 text-gray-400 hover:text-white">
+                        <button
+                            onClick={() => {
+                                const headers = ['Row No', 'Name', 'Email', 'Mobile', 'Error Message'];
+                                const csvContent = [
+                                    headers.join(','),
+                                    ...invalidRows.map(row => {
+                                        const name = row.rawData['FullName'] || row.rawData['Name'] || row.rawData['full_name'] || '';
+                                        const email = row.rawData['Email'] || row.rawData['email'] || '';
+                                        const mobile = row.rawData['Mobile'] || row.rawData['mobile'] || row.rawData['mobile_number'] || '';
+                                        // Escape double quotes in error message
+                                        const error = `"${(row.errorMessage || '').replace(/"/g, '""')}"`;
+                                        return [row.rowIndex, name, email, mobile, error].join(',');
+                                    })
+                                ].join('\n');
+
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const link = document.createElement('a');
+                                const url = URL.createObjectURL(blob);
+                                link.setAttribute('href', url);
+                                link.setAttribute('download', 'bulk_upload_errors.csv');
+                                link.style.visibility = 'hidden';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                            className="text-xs flex items-center gap-1 text-gray-400 hover:text-white"
+                        >
                             Download Error Report
                         </button>
                     </div>

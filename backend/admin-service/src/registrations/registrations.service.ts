@@ -281,7 +281,11 @@ export class RegistrationsService {
         await manager.save(attempt);
 
         // F. Generate Questions for this Level (Only Level 1)
-        if (level.levelNumber === 1 || level.name.includes('Level 1')) {
+        // F. Generate Questions for this Level (Only Level 1)
+        // NOTE: This logic applies to both Single Registration and Bulk Upload.
+        // We strictly generate questions ONLY for Level 1 here.
+        // Level 2+ questions are generated JIT when the user starts the assessment.
+        if (level.levelNumber === 1 || level.name === 'Level 1') {
           await this.assessmentGenService.generateQuestions(
             attempt,
             manager,
@@ -417,7 +421,9 @@ export class RegistrationsService {
         });
         await manager.save(attempt);
 
-        if (level.levelNumber === 1 || level.name.includes('Level 1')) {
+        // NOTE: This logic applies to Bulk Upload for Existing Users as well.
+        // Strictly generate questions ONLY for Level 1.
+        if (level.levelNumber === 1 || level.name === 'Level 1') {
           await this.assessmentGenService.generateQuestions(attempt, manager);
         }
       }

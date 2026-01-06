@@ -33,21 +33,24 @@ export const BulkUploadDropzone: React.FC<BulkUploadDropzoneProps> = ({
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0];
-            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            if (file.name.toLowerCase().endsWith('.csv')) {
                 onFileSelected(file);
             } else {
-                // Handle error via parent or internal state? 
-                // Since parent passes error prop, we might assume parent validation, 
-                // but here I can't easily trigger parent error without a callback.
-                // I'll alert or ignore. 
-                alert("Only CSV files are allowed");
+                alert("Invalid file format. Only CSV files are allowed.");
             }
         }
     };
 
     const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            onFileSelected(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                onFileSelected(file);
+            } else {
+                alert("Invalid file format. Only CSV files are allowed.");
+                // Clear input so user can try again
+                e.target.value = '';
+            }
         }
     };
 
