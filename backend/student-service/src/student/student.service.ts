@@ -8,6 +8,19 @@ import { AssessmentAttempt } from '../entities/assessment_attempt.entity';
 import { AssessmentLevel } from '../entities/assessment_level.entity';
 import { AssessmentAnswer } from '../entities/assessment_answer.entity';
 
+export interface AssessmentProgressItem {
+  id: number;
+  stepName: string;
+  description: string;
+  status: string;
+  levelNumber?: number;
+  completedQuestions: number;
+  totalQuestions: number;
+  unlockTime: Date | null;
+  dateCompleted: Date | null;
+  attemptId: number;
+}
+
 @Injectable()
 export class StudentService {
   private readonly logger = new ConsoleLogger(StudentService.name);
@@ -115,7 +128,7 @@ export class StudentService {
     return { message: 'User already exists', user };
   }
 
-  async getAssessmentProgress(email: string) {
+  async getAssessmentProgress(email: string): Promise<AssessmentProgressItem[]> {
     const user = await this.userRepo.findOne({ where: { email } });
     if (!user) return [];
 
@@ -141,7 +154,7 @@ export class StudentService {
 
     attempts.sort((a, b) => (a.assessmentLevel?.levelNumber || 0) - (b.assessmentLevel?.levelNumber || 0));
 
-    const progressData: any[] = [];
+    const progressData: AssessmentProgressItem[] = [];
     let previousAttempt: AssessmentAttempt | null = null;
 
     for (const attempt of attempts) {
