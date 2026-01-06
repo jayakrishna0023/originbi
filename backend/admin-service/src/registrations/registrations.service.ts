@@ -400,12 +400,13 @@ export class RegistrationsService {
 
       return { data, total, page, limit };
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
-        `findAll Registrations Error: ${error.message}`,
-        error.stack,
+        `findAll Registrations Error: ${err.message}`,
+        err.stack,
       );
       throw new InternalServerErrorException(
-        `Failed to fetch registrations: ${error.message}`,
+        `Failed to fetch registrations: ${err.message}`,
       );
     }
   }

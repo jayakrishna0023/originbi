@@ -75,7 +75,7 @@ export class AssessmentGenerationService {
       })
       .andWhere('q.is_active = true')
       .andWhere('q.is_deleted = false')
-      .getRawMany();
+      .getRawMany<{ setNumber: number }>();
 
     if (!setsResult || setsResult.length === 0) {
       this.logger.warn(
@@ -86,7 +86,7 @@ export class AssessmentGenerationService {
 
     // 3. Pick One Set Randomly
     const sets = setsResult.map((s) => s.setNumber);
-    const selectedSet = sets[Math.floor(Math.random() * sets.length)];
+    const selectedSet: number = sets[Math.floor(Math.random() * sets.length)];
 
     this.logger.log(
       `Selected Set ${selectedSet} (from [${sets.join(', ')}]) for Attempt ${attempt.id
