@@ -13,7 +13,7 @@ import MobileInput from "@/components/ui/MobileInput";
 import { registrationService } from "@/lib/services";
 import { CreateRegistrationDto } from "@/lib/services/registration.service";
 import { Program, Department } from "@/lib/types";
-import { BulkUploadModal } from "@/components/ui/BulkUploadModal";
+import BulkUploadRegistration from "./BulkUploadRegistration";
 
 interface AddRegistrationFormProps {
   onCancel: () => void;
@@ -48,7 +48,7 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [isBulkMode, setIsBulkMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Track active field for Z-Index management
@@ -208,14 +208,12 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
   const inactiveToggleClasses =
     "text-gray-600 hover:text-black dark:text-gray-300 dark:hover:text-white";
 
+  if (isBulkMode) {
+    return <BulkUploadRegistration onCancel={() => setIsBulkMode(false)} />;
+  }
+
   return (
     <div className="w-full font-sans animate-fade-in pb-12">
-      {/* Bulk Upload Modal */}
-      <BulkUploadModal
-        isOpen={isBulkModalOpen}
-        onClose={() => setIsBulkModalOpen(false)}
-        onSuccess={onRegister}
-      />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-8">
@@ -246,7 +244,7 @@ const AddRegistrationForm: React.FC<AddRegistrationFormProps> = ({
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setIsBulkModalOpen(true)}
+            onClick={() => setIsBulkMode(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-brand-light-tertiary dark:bg-[#1A3A2C] border border-transparent dark:border-[#1A3A2C] rounded-lg text-sm font-medium text-brand-text-light-primary dark:text-white hover:opacity-90 transition-opacity"
           >
             <span>Bulk Registration</span>
