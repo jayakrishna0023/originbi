@@ -33,12 +33,31 @@ import { MailAssetsController } from './mail/mail-assets.controller';
         const isProd =
           (config.get<string>('NODE_ENV') || 'development') === 'production';
 
-        if (isProd) {
+        /* if (isProd) {
           const url = config.get<string>('DATABASE_URL');
           if (!url)
             throw new Error(
               'DATABASE_URL is missing in production environment',
             );
+
+          return {
+            type: 'postgres',
+            url,
+            autoLoadEntities: true,
+            synchronize: config.get<string>('DB_SYNC') === 'true',
+            ssl: { rejectUnauthorized: false },
+            schema: 'public',
+          };
+        } */
+
+        if (isProd) {
+          const rawUrl = config.get<string>('DATABASE_URL');
+          if (!rawUrl) throw new Error('DATABASE_URL is missing');
+
+          // Ensure sslmode=require in the URL
+          const url = rawUrl.includes('sslmode=')
+            ? rawUrl
+            : (rawUrl.includes('?') ? `${rawUrl}&sslmode=require` : `${rawUrl}?sslmode=require`);
 
           return {
             type: 'postgres',
