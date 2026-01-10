@@ -59,9 +59,9 @@ const NavItem: React.FC<NavItemProps> = ({
         // SCALING: 
         // LG/XL: Ultra-Compact Mode (h-8, px-2.5) to fit 5 items on laptop
         // 2XL: Robust Mode (h-10, px-6) for large screens
-        className={`flex items-center ${spacingClass} rounded-full transition-all duration-200 w-full lg:h-8 2xl:h-9 cursor-pointer ${active
-          ? "bg-brand-green text-white shadow-[0_4px_14px_0_rgba(30,211,106,0.3)] border border-transparent px-2.5 2xl:px-4"
-          : "bg-white border border-gray-200 text-[#19211C] hover:bg-gray-50 hover:text-black hover:border-gray-300 dark:bg-transparent dark:border-white/10 dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white px-2.5 2xl:px-4"
+        className={`flex items-center ${spacingClass} rounded-full transition-all duration-200 w-full lg:h-8 2xl:h-9 cursor-pointer ${isMobile ? "py-3 min-h-[44px]" : ""} ${active
+          ? `bg-brand-green text-white shadow-[0_4px_14px_0_rgba(30,211,106,0.3)] border border-transparent ${isMobile ? "px-4" : "px-2.5 2xl:px-4"}`
+          : `bg-white border border-gray-200 text-[#19211C] hover:bg-gray-50 hover:text-black hover:border-gray-300 dark:bg-transparent dark:border-white/10 dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white ${isMobile ? "px-4" : "px-2.5 2xl:px-4"}`
           }`}
       >
         <div className={`${active ? "text-white" : "text-brand-green dark:text-white"}`}>
@@ -131,6 +131,16 @@ const Header: React.FC<HeaderProps> = ({
   const langMenuRef = useRef<HTMLDivElement>(null);
   const notificationsMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const [corporateData, setCorporateData] = useState<any>(null);
 
@@ -237,7 +247,9 @@ const Header: React.FC<HeaderProps> = ({
   );
 
   return (
-    <header className="fixed top-0 left-0 right-0 w-full bg-brand-light-secondary dark:bg-brand-dark-secondary z-50 border-b border-brand-light-tertiary dark:border-transparent shadow-sm dark:shadow-none transition-all duration-300">
+    <header
+      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-transparent backdrop-blur-xl border-b border-[#E0E0E0] dark:border-white/10 shadow-none"
+    >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-3 sm:py-4 flex items-center justify-between h-full">
         <div className="flex items-center gap-2 lg:gap-2 2xl:gap-4">
           {!hideNav && (
@@ -411,30 +423,39 @@ const Header: React.FC<HeaderProps> = ({
 
         {
           isMobileMenuOpen && !hideNav && (
-            <div
-              id="mobile-menu"
-              ref={mobileMenuRef}
-              className="md:hidden absolute top-full left-0 w-full bg-brand-light-secondary dark:bg-brand-dark-secondary shadow-lg z-40 border-t border-brand-light-tertiary dark:border-brand-dark-tertiary animate-fade-in"
-            >
-              <nav className="flex flex-col p-4 space-y-2">
-                {renderNavItems(true)}
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+              ></div>
 
-                {/* Mobile Bottom Section */}
-                <div className="border-t border-brand-light-tertiary dark:border-brand-dark-tertiary my-2 pt-2">
-                  <div className="flex justify-between items-center px-2 mb-2">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">Appearance</p>
-                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                  </div>
-                  <div className="flex justify-between items-center px-2">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">Language</p>
-                    <div className="flex bg-white dark:bg-brand-dark-tertiary rounded-lg p-1 border border-brand-light-tertiary dark:border-white/10">
-                      <button onClick={() => setLanguage("ENG")} className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${language === "ENG" ? "bg-brand-green text-white" : "text-brand-text-light-secondary dark:text-brand-text-secondary"}`}>ENG</button>
-                      <button onClick={() => setLanguage("TAM")} className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${language === "TAM" ? "bg-brand-green text-white" : "text-brand-text-light-secondary dark:text-brand-text-secondary"}`}>TAM</button>
+              {/* Menu Container */}
+              <div
+                id="mobile-menu"
+                ref={mobileMenuRef}
+                className="md:hidden absolute top-full left-0 w-full bg-brand-light-secondary dark:bg-brand-dark-secondary shadow-xl z-40 border-t border-brand-light-tertiary dark:border-brand-dark-tertiary animate-fade-in max-h-[85vh] overflow-y-auto"
+              >
+                <nav className="flex flex-col p-4 space-y-2">
+                  {renderNavItems(true)}
+
+                  {/* Mobile Bottom Section */}
+                  <div className="border-t border-brand-light-tertiary dark:border-brand-dark-tertiary my-2 pt-2">
+                    <div className="flex justify-between items-center px-2 mb-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">Appearance</p>
+                      <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                    </div>
+                    <div className="flex justify-between items-center px-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">Language</p>
+                      <div className="flex bg-white dark:bg-brand-dark-tertiary rounded-lg p-1 border border-brand-light-tertiary dark:border-white/10">
+                        <button onClick={() => setLanguage("ENG")} className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${language === "ENG" ? "bg-brand-green text-white" : "text-brand-text-light-secondary dark:text-brand-text-secondary"}`}>ENG</button>
+                        <button onClick={() => setLanguage("TAM")} className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${language === "TAM" ? "bg-brand-green text-white" : "text-brand-text-light-secondary dark:text-brand-text-secondary"}`}>TAM</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </nav>
-            </div>
+                </nav>
+              </div>
+            </>
           )
         }
       </div>
