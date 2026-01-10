@@ -48,10 +48,11 @@ const NavItem: React.FC<NavItemProps> = ({
 }) => {
     // Scaling Logic: Show text on LG (Laptops) and up. 
     // COMPACT on LG/XL to prevent overlap. ROBUST on 2XL.
-    const showDesktopText = "hidden lg:inline";
+    const showDesktopText = "hidden md:inline";
+
     const spacingClass = isMobile
         ? "gap-3"
-        : "justify-center gap-0 lg:gap-1 2xl:gap-2";
+        : "justify-center gap-1 lg:gap-2 2xl:gap-3";
 
     return (
         <div className="relative group">
@@ -199,10 +200,11 @@ const Header: React.FC<HeaderProps> = ({
 
     const pathname = usePathname();
     const activeView = (() => {
-        if (pathname.includes('/dashboard')) return 'dashboard';
-        if (pathname.includes('/programs')) return 'programs';
+        // More specific checks first
         if (pathname.includes('/corporate')) return 'corporate';
         if (pathname.includes('/registrations')) return 'registrations';
+        if (pathname.includes('/programs')) return 'programs';
+        if (pathname.includes('/dashboard')) return 'dashboard';
         return currentView;
     })();
 
@@ -211,9 +213,6 @@ const Header: React.FC<HeaderProps> = ({
     const handleNavClick = (view: any) => {
         onNavigate?.(view);
         setMobileMenuOpen(false);
-        // If onNavigate isn't provided (e.g. in layout), we might need to router.push here?
-        // But the parent is passing a handleNavigate that does router.push.
-        // We will adapt the parent layout to pass a default handler or handle it here.
     };
 
     const notifications = [

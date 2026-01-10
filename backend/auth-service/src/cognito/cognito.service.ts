@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CognitoIdentityProviderClient,
@@ -26,6 +26,7 @@ export class CognitoService {
 
     const accessKeyId = this.config.get<string>('AWS_ACCESS_KEY_ID');
     const secretAccessKey = this.config.get<string>('AWS_SECRET_ACCESS_KEY');
+    const sessionToken = this.config.get<string>('AWS_SESSION_TOKEN');
 
     if (!this.userPoolId) throw new Error('COGNITO_USER_POOL_ID is not set');
     if (!region) throw new Error('COGNITO_REGION is not set');
@@ -42,6 +43,7 @@ export class CognitoService {
       credentials: {
         accessKeyId,
         secretAccessKey,
+        sessionToken,
       },
     });
   }
@@ -120,6 +122,13 @@ export class CognitoService {
         name: error?.name,
         message: error?.message,
       });
+
+      if (error?.name === 'TooManyRequestsException' || error?.name === 'ThrottlingException') {
+        throw new HttpException(
+          'Too Many Requests - AWS Rate Limit Exceeded. Please wait a moment and try again.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
 
       throw new InternalServerErrorException(
         `Cognito error: ${error?.name || 'Unknown'} - ${error?.message || 'No message'}`,

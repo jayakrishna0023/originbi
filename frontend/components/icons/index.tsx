@@ -1,5 +1,51 @@
 import React from "react";
 
+export const EditPencilIcon: React.FC<{ className?: string }> = ({
+  className = "w-[21px] h-[20px]",
+}) => (
+  <svg
+    className={className}
+    viewBox="0 0 21 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M10.6094 3.88574L1.02461 13.4705C0.671427 13.8243 0.448216 14.2872 0.391217 14.7838L0.0093175 18.1371C-0.0155769 18.3729 0.0095497 18.6113 0.0830564 18.8368C0.156563 19.0622 0.276797 19.2696 0.435905 19.4454C0.595013 19.6212 0.789417 19.7615 1.00642 19.857C1.22343 19.9526 1.45815 20.0013 1.69526 20H1.89087L5.24413 19.6181C5.73884 19.5609 6.20066 19.3414 6.55749 18.9941L16.1422 9.4L10.6094 3.88574Z" fill="currentColor" />
+    <path d="M19.3837 3.07532L16.9526 0.644203C16.7492 0.44002 16.5075 0.278005 16.2414 0.167456C15.9752 0.0569071 15.6899 0 15.4017 0C15.1135 0 14.8282 0.0569071 14.562 0.167456C14.2959 0.278005 14.0542 0.44002 13.8508 0.644203L11.5967 2.89834L17.1296 8.43122L19.3837 6.17709C19.5879 5.97371 19.7499 5.73202 19.8604 5.46588C19.971 5.19974 20.0279 4.91439 20.0279 4.6262C20.0279 4.33801 19.971 4.05266 19.8604 3.78652C19.7499 3.52038 19.5879 3.27869 19.3837 3.07532Z" fill="currentColor" />
+  </svg>
+);
+
+export const DiamondIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L2 12L12 22L22 12L12 2Z" />
+  </svg>
+);
+
+export const TrendUpIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+    <polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+
+export const TrendDownIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+    <polyline points="17 18 23 18 23 12" />
+  </svg>
+);
+
+export const CircleArrowUpIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M16 12l-4-4-4 4" />
+    <path d="M12 16V8" />
+  </svg>
+);
+
+export const SearchIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+);
+
 export const FilterFunnelIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M17.0773 0H1.97844C1.59514 0.000301844 1.22016 0.111854 0.899022 0.321118C0.577883 0.530383 0.324388 0.828361 0.169304 1.17889C0.0142188 1.52942 -0.0357883 1.91743 0.0253517 2.29582C0.0864917 2.67422 0.25615 3.02673 0.513736 3.31059L7.05726 10.5071V17.2941C7.05732 17.4268 7.09476 17.5567 7.1653 17.6691C7.23584 17.7815 7.33662 17.8717 7.45608 17.9294C7.55156 17.9765 7.65669 18.0006 7.76314 18C7.92358 17.9999 8.07918 17.9451 8.20432 17.8447L9.52785 16.7859L11.7337 15.0212C11.8163 14.9551 11.8829 14.8713 11.9287 14.776C11.9745 14.6807 11.9984 14.5763 11.9984 14.4706V10.5071L18.542 3.31059C18.7995 3.02673 18.9692 2.67422 19.0303 2.29582C19.0915 1.91743 19.0415 1.52942 18.8864 1.17889C18.7313 0.828361 18.4778 0.530383 18.1567 0.321118C17.8355 0.111854 17.4606 0.000301844 17.0773 0Z" fill="#1ED36A" />
@@ -957,44 +1003,44 @@ export const SortIcon: React.FC<{
   </svg>
 );
 export const FileUploadPlaceholderIcon: React.FC<{ className?: string }> = ({
-    className = "w-16 h-16",
+  className = "w-16 h-16",
 }) => (
-    <svg
-        className={className}
-        viewBox="0 0 54 64"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path
-            d="M33.75 0H6.75C3.0105 0 0 3.0105 0 6.75V57.25C0 60.9895 3.0105 64 6.75 64H47.25C50.9895 64 54 60.9895 54 57.25V20.25L33.75 0ZM43.875 51.75H10.125V47.25H43.875V51.75ZM43.875 40.5H10.125V36H43.875V40.5ZM30.375 23.625V4.875L49.125 23.625H30.375Z"
-            fill="#1ED36A"
-        />
-        <circle cx="42" cy="42" r="10" fill="#1ED36A" stroke="#15171A" strokeWidth="3" />
-        <path
-            d="M42 36L42 48M37 41L42 36L47 41"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-    </svg>
+  <svg
+    className={className}
+    viewBox="0 0 54 64"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M33.75 0H6.75C3.0105 0 0 3.0105 0 6.75V57.25C0 60.9895 3.0105 64 6.75 64H47.25C50.9895 64 54 60.9895 54 57.25V20.25L33.75 0ZM43.875 51.75H10.125V47.25H43.875V51.75ZM43.875 40.5H10.125V36H43.875V40.5ZM30.375 23.625V4.875L49.125 23.625H30.375Z"
+      fill="#1ED36A"
+    />
+    <circle cx="42" cy="42" r="10" fill="#1ED36A" stroke="#15171A" strokeWidth="3" />
+    <path
+      d="M42 36L42 48M37 41L42 36L47 41"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
 );
 
 export const DownloadIcon: React.FC<{ className?: string }> = ({
-    className = "w-4 h-4",
+  className = "w-4 h-4",
 }) => (
-    <svg
-        className={className}
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-    </svg>
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
 );
