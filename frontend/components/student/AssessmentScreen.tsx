@@ -85,12 +85,13 @@ const Stepper: React.FC<StepperProps> = ({ steps }) => {
   const maxContainerWidth = Math.min(steps.length * 280, 1000);
 
   return (
-    <div className="w-full flex justify-center mb-6">
+    <div className="w-full flex justify-start md:justify-center mb-6">
       <div
-        className="relative grid isolate min-w-[600px] md:min-w-0 md:mx-auto w-full transition-all duration-300"
+        className="relative grid isolate md:mx-auto w-full transition-all duration-300"
         style={{
           maxWidth: `${maxContainerWidth}px`,
-          gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))`
+          gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))`,
+          minWidth: `${Math.max(steps.length * 120, 280)}px`
         }}
       >
         {lines.map((lineIndex) => {

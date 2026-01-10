@@ -641,7 +641,7 @@ const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
           </div>
 
           {/* Navigation Actions */}
-          <div className="w-full flex justify-between items-center mt-auto pt-6 pb-6 lg:pb-10 shrink-0">
+          <div className="sticky bottom-0 w-full flex justify-between items-center mt-auto py-4 lg:pb-10 shrink-0 z-30 bg-brand-light-primary/95 dark:bg-brand-dark-primary/95 backdrop-blur-md border-t border-brand-light-tertiary/20 dark:border-white/5 -mx-4 px-4 lg:-mx-0 lg:px-0">
             <button
               onClick={handlePrevious}
               className="px-[clamp(20px,2vw,32px)] py-[clamp(6px,0.8vw,12px)] rounded-full border border-brand-light-tertiary dark:border-[#303438] text-brand-text-light-secondary dark:text-white transition-colors hover:bg-gray-100 dark:hover:bg-[#24272B] text-[clamp(11px,0.9vw,15px)] font-medium cursor-pointer"

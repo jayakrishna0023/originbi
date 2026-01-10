@@ -3,6 +3,7 @@ import {
     InternalServerErrorException,
     BadRequestException,
     Logger,
+    HttpException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -62,11 +63,18 @@ export class CorporateService {
         } catch (err: any) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
             const authErr = err?.response?.data || err?.message || err;
-            this.logger.error('Error creating Cognito user:', authErr);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+            const status = err?.response?.status;
+
+            this.logger.error(`Error creating Cognito user (Status: ${status}):`, authErr);
 
             const errorMessage = typeof authErr === 'string'
                 ? authErr
                 : ((authErr as { message?: string })?.message || JSON.stringify(authErr) || 'Failed to create Cognito user');
+
+            if (status === 429) {
+                throw new HttpException(errorMessage, 429);
+            }
 
             throw new InternalServerErrorException(errorMessage);
         }
@@ -646,6 +654,7 @@ export class CorporateService {
         const ses = new SES({
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            sessionToken: process.env.AWS_SESSION_TOKEN,
             region: process.env.AWS_REGION,
         });
 
